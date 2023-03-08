@@ -1,14 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import Demo from './views/Demo5';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import Demo from "./views/Demo5";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <>
-        <Demo />
-    </>
+  <>
+    <Demo />
+  </>
 );
-
 
 /* import Vote from './views/Vote';
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -51,7 +50,6 @@ root.render(
         </Dialog>
     </>
 ); */
-
 
 /* import DemoOne from '@/views/DemoOne';
 const root = ReactDOM.createRoot(document.getElementById('root'));
