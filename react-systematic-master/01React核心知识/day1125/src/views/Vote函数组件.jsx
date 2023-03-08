@@ -15,30 +15,40 @@
  但是大部分需求，都需要在第一次渲染完毕后，基于组件内部的某些操作，让组件可以更新，以此呈现出不同的效果！！==> 动态组件「方法：类组件、Hooks组件(在函数组件中，使用Hooks函数)」
  */
 const Vote = function Vote(props) {
-    let { title } = props;
-    let supNum = 10,
-        oppNum = 5;
+  let { title } = props;
+  let supNum = 10,
+    oppNum = 5;
 
-    return <div className="vote-box">
-        <div className="header">
-            <h2 className="title">{title}</h2>
-            <span>{supNum + oppNum}人</span>
-        </div>
-        <div className="main">
-            <p>支持人数：{supNum}人</p>
-            <p>反对人数：{oppNum}人</p>
-        </div>
-        <div className="footer">
-            <button onClick={() => {
-                supNum++;
-                console.log(supNum);
-            }}>支持</button>
+  return (
+    <div className="vote-box">
+      <div className="header">
+        <h2 className="title">{title}</h2>
+        <span>{supNum + oppNum}人</span>
+      </div>
+      <div className="main">
+        <p>支持人数：{supNum}人</p>
+        <p>反对人数：{oppNum}人</p>
+      </div>
+      <div className="footer">
+        <button
+          onClick={() => {
+            supNum++;
+            console.log(supNum);
+          }}
+        >
+          支持
+        </button>
 
-            <button onClick={() => {
-                oppNum++;
-                console.log(oppNum);
-            }}>反对</button>
-        </div>
-    </div>;
+        <button
+          onClick={() => {
+            oppNum++;
+            console.log(oppNum);
+          }}
+        >
+          反对
+        </button>
+      </div>
+    </div>
+  );
 };
 export default Vote;
