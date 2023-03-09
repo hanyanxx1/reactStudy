@@ -86,6 +86,7 @@
     2. 销毁
 
   父子组件嵌套，处理机制上遵循深度优先原则：父组件在操作中，遇到子组件，一定是把子组件处理完，父组件才能继续处理
+  深度优先原则：父组件在操作中，遇到子组件，一定是把子组件处理完，父组件才能继续处理
     + 父组件第一次渲染
       父 willMount -> 父 render「子 willMount -> 子 render -> 子didMount」 -> 父didMount 
     + 父组件更新：
@@ -94,85 +95,93 @@
       父 willUnmount -> 处理中「子willUnmount -> 子销毁」-> 父销毁
 */
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 class Vote extends React.Component {
   /* 属性规则校验 */
   static defaultProps = {
-    num: 0
+    num: 0,
   };
   static propTypes = {
     title: PropTypes.string.isRequired,
-    num: PropTypes.number
+    num: PropTypes.number,
   };
 
   /* 初始化状态 */
   state = {
     supNum: 20,
-    oppNum: 10
+    oppNum: 10,
   };
 
   render() {
-    console.log('render：渲染');
+    console.log("render：渲染");
     let { title } = this.props,
       { supNum, oppNum } = this.state;
 
-    return <div className="vote-box">
-      <div className="header">
-        <h2 className="title">{title}</h2>
-        <span>{supNum + oppNum}人</span>
-      </div>
-      <div className="main">
-        <p>支持人数：{supNum}人</p>
-        <p>反对人数：{oppNum}人</p>
-      </div>
-      <div className="footer">
-        <button onClick={() => {
-          this.setState({
-            supNum: supNum + 1
-          });
-        }}>支持</button>
+    return (
+      <div className="vote-box">
+        <div className="header">
+          <h2 className="title">{title}</h2>
+          <span>{supNum + oppNum}人</span>
+        </div>
+        <div className="main">
+          <p>支持人数：{supNum}人</p>
+          <p>反对人数：{oppNum}人</p>
+        </div>
+        <div className="footer">
+          <button
+            onClick={() => {
+              this.setState({
+                supNum: supNum + 1,
+              });
+            }}
+          >
+            支持
+          </button>
 
-        <button onClick={() => {
-          this.state.oppNum++;
-          this.forceUpdate();
-        }}>反对</button>
+          <button
+            onClick={() => {
+              this.state.oppNum++;
+              this.forceUpdate();
+            }}
+          >
+            反对
+          </button>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   UNSAFE_componentWillMount() {
-    console.log('componentWillMount：第一次渲染之前');
+    console.log("componentWillMount：第一次渲染之前");
   }
 
   componentDidMount() {
-    console.log('componentDidMount：第一次渲染完毕');
+    console.log("componentDidMount：第一次渲染完毕");
   }
 
-
   shouldComponentUpdate(nextProps, nextState) {
-    console.log('shouldComponentUpdate:', this.props, nextProps);
+    console.log("shouldComponentUpdate:", this.props, nextProps);
     return true;
   }
 
   UNSAFE_componentWillUpdate(nextProps, nextState) {
-    console.log('componentWillUpdate:', this.props, nextProps);
+    console.log("componentWillUpdate:", this.props, nextProps);
   }
 
   componentDidUpdate() {
-    console.log('componentDidUpdate:组件更新完毕');
+    console.log("componentDidUpdate:组件更新完毕");
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    console.log('componentWillReceiveProps:', this.props, nextProps);
+    console.log("componentWillReceiveProps:", this.props, nextProps);
   }
 
   componentWillUnmount() {
-    console.log('componentWillUnmount:组件销毁之前');
+    console.log("componentWillUnmount:组件销毁之前");
   }
 }
 export default Vote;
-
 
 /*
  函数组件是“静态组件”：
