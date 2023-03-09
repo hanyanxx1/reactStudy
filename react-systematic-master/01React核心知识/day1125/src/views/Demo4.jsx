@@ -1,38 +1,44 @@
 import React from "react";
 
 class Child1 extends React.Component {
-    state = {
-        x: 100,
-        y: 200
-    };
-    render() {
-        return <div>
-            子组件1
-            <em ref={x => this.emBox = x}>100</em>
-        </div>;
-    }
+  state = {
+    x: 100,
+    y: 200,
+  };
+  render() {
+    return (
+      <div>
+        子组件1
+        <em ref={(x) => (this.emBox = x)}>100</em>
+      </div>
+    );
+  }
 }
 
 const Child2 = React.forwardRef(function Child2(props, ref) {
-    // console.log(ref); //我们调用Child2的时候，设置的ref属性值「函数」 
-    // -> x => this.child2 = x
-    return <div>
-        子组件2
-        <button ref={ref}>按钮</button>
-    </div>;
+  // console.log(ref); //我们调用Child2的时候，设置的ref属性值「函数」
+  // -> x => this.child2 = x
+  return (
+    <div>
+      子组件2
+      <button ref={ref}>按钮</button>
+    </div>
+  );
 });
 
 class Demo extends React.Component {
-    render() {
-        return <div>
-            <Child1 ref={x => this.child1 = x} />
-            <Child2 ref={x => this.child2 = x} />
-        </div>;
-    }
-    componentDidMount() {
-        console.log(this.child1); //存储的是:子组件的实例对象
-        // console.log(this.child2); //存储的是:子组件内部的button按钮
-    }
+  render() {
+    return (
+      <div>
+        <Child1 ref={(x) => (this.child1 = x)} />
+        <Child2 ref={(x) => (this.child2 = x)} />
+      </div>
+    );
+  }
+  componentDidMount() {
+    console.log(this.child1); //存储的是:子组件的实例对象
+    // console.log(this.child2); //存储的是:子组件内部的button按钮
+  }
 }
 
 export default Demo;
