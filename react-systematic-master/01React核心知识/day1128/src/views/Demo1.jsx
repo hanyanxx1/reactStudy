@@ -1,28 +1,28 @@
 import React from "react";
-import { flushSync } from 'react-dom';
+import { flushSync } from "react-dom";
 // flushSync:可以刷新“updater更新队列”，也就是让修改状态的任务立即批处理一次！！
 
 class Demo extends React.Component {
-    state = {
-        x: 10,
-        y: 5,
-        z: 0
-    };
+  state = {
+    x: 10,
+    y: 5,
+    z: 0,
+  };
 
-    handle = () => {
-        let { x, y } = this.state;
-        this.setState({ x: x + 1 });
-        console.log(this.state); //10/5/0
-        flushSync(() => {
-            this.setState({ y: y + 1 });
-            console.log(this.state); //10/5/0
-        });
-        console.log(this.state); //11/6/0
-        // 在修改z之前，要保证x/y都已经更改和让视图更新了
-        this.setState({ z: this.state.x + this.state.y });
-    };
+  handle = () => {
+    let { x, y } = this.state;
+    this.setState({ x: x + 1 });
+    console.log(this.state); //10/5/0
+    flushSync(() => {
+      this.setState({ y: y + 1 });
+      console.log(this.state); //10/5/0
+    });
+    console.log(this.state); //11/6/0
+    // 在修改z之前，要保证x/y都已经更改和让视图更新了
+    this.setState({ z: this.state.x + this.state.y });
+  };
 
-    /* handle = () => {
+  /* handle = () => {
         let { x, y, z } = this.state;
         this.setState({ x: x + 1 }); //异步
         this.setState({ y: y + 1 }); //异步
@@ -34,19 +34,20 @@ class Demo extends React.Component {
         }, 1000);
     }; */
 
-    render() {
-        console.log('视图渲染:RENDER');
-        let { x, y, z } = this.state;
-        return <div>
-            x:{x} - y:{y} - z:{z}
-            <br />
-            <button onClick={this.handle}>按钮</button>
-        </div>;
-    }
+  render() {
+    console.log("视图渲染:RENDER");
+    let { x, y, z } = this.state;
+    return (
+      <div>
+        x:{x} - y:{y} - z:{z}
+        <br />
+        <button onClick={this.handle}>按钮</button>
+      </div>
+    );
+  }
 }
 
 export default Demo;
-
 
 /*
  在React18 和 React16中，关于setState是同步还是异步，是有一些区别的！
