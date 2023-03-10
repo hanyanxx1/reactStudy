@@ -1,34 +1,36 @@
 import React from "react";
 
 class Demo extends React.Component {
-    state = {
-        x: 10,
-        y: 5,
-        z: 0
-    };
+  state = {
+    x: 10,
+    y: 5,
+    z: 0,
+  };
 
-    handle = () => {
-        let { x, y, z } = this.state;
-        this.setState({ x: x + 1 });
-        this.setState({ y: y + 1 });
-        console.log(this.state);
+  handle = () => {
+    let { x, y, z } = this.state;
+    this.setState({ x: x + 1 });
+    this.setState({ y: y + 1 });
+    console.log(this.state);
 
-        setTimeout(() => {
-            this.setState({ z: z + 1 });
-            this.setState({ x: 100 });
-            console.log(this.state);
-        }, 1000);
-    };
+    setTimeout(() => {
+      this.setState({ z: z + 1 });
+      this.setState({ x: 100 });
+      console.log(this.state);
+    }, 1000);
+  };
 
-    render() {
-        console.log('视图渲染:RENDER');
-        let { x, y, z } = this.state;
-        return <div>
-            x:{x} - y:{y} - z:{z}
-            <br />
-            <button onClick={this.handle}>按钮</button>
-        </div>;
-    }
+  render() {
+    console.log("视图渲染:RENDER");
+    let { x, y, z } = this.state;
+    return (
+      <div>
+        x:{x} - y:{y} - z:{z}
+        <br />
+        <button onClick={this.handle}>按钮</button>
+      </div>
+    );
+  }
 }
 
 export default Demo;
