@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Button } from 'antd';
-import './Demo.less';
+import { Button } from "antd";
+import "./Demo.less";
 
 /*
  useEffect：在函数组件中，使用生命周期函数
@@ -25,40 +25,40 @@ import './Demo.less';
    });
  */
 const Demo = function Demo() {
-    let [num, setNum] = useState(0),
-        [x, setX] = useState(100);
+  let [num, setNum] = useState(0),
+    [x, setX] = useState(100);
 
-    useEffect(() => {
-        // 获取最新的状态值
-        console.log('@1', num);
-    });
-    
-    useEffect(() => {
-        console.log('@2', num);
-    }, []);
+  useEffect(() => {
+    // 获取最新的状态值
+    console.log("@1", num);
+  });
 
-    useEffect(() => {
-        console.log('@3', num);
-    }, [num]);
+  useEffect(() => {
+    console.log("@2", num);
+  }, []);
 
-    useEffect(() => {
-        return () => {
-            // 获取的是上一次的状态值
-            console.log('@4', num);
-        };
-    });
+  useEffect(() => {
+    console.log("@3", num);
+  }, [num]);
 
-    const handle = () => {
-        setNum(num + 1);
+  useEffect(() => {
+    return () => {
+      // 获取的是上一次的状态值
+      console.log("@4", num);
     };
-    return <div className="demo">
-        <span className="num">{num}</span>
-        <Button type="primary"
-            size="small"
-            onClick={handle}>
-            新增
-        </Button>
-    </div>;
+  });
+
+  const handle = () => {
+    setNum(num + 1);
+  };
+  return (
+    <div className="demo">
+      <span className="num">{num}</span>
+      <Button type="primary" size="small" onClick={handle}>
+        新增
+      </Button>
+    </div>
+  );
 };
 
 export default Demo;
