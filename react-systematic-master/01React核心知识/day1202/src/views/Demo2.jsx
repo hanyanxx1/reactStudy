@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button } from 'antd';
-import './Demo.less';
+import { Button } from "antd";
+import "./Demo.less";
 
 /*
  函数组件的每一次渲染(或者是更新)，都是把函数(重新)执行，产生一个全新的“私有上下文”!
@@ -36,22 +36,22 @@ setNum(100); //=>_state=100 通知视图更新
 let [num2, setNum] = useState(0); //num2=100  setNum=setState 0x002
  */
 const Demo = function Demo() {
-    let [num, setNum] = useState(0);
+  let [num, setNum] = useState(0);
 
-    const handle = () => {
-        setNum(100);
-        setTimeout(() => {
-            console.log(num); // 0
-        }, 2000);
-    };
-    return <div className="demo">
-        <span className="num">{num}</span>
-        <Button type="primary"
-            size="small"
-            onClick={handle}>
-            新增
-        </Button>
-    </div>;
+  const handle = () => {
+    setNum(100);
+    setTimeout(() => {
+      console.log(num); // 0
+    }, 2000);
+  };
+  return (
+    <div className="demo">
+      <span className="num">{num}</span>
+      <Button type="primary" size="small" onClick={handle}>
+        新增
+      </Button>
+    </div>
+  );
 };
 
 export default Demo;

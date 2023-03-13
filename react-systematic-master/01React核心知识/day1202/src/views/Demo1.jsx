@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button } from 'antd';
-import './Demo.less';
+import { Button } from "antd";
+import "./Demo.less";
 
 /*
  useState：React Hook函数之一，目的是在函数组件中使用状态，并且后期基于状态的修改，可以让组件更新
@@ -16,15 +16,19 @@ import './Demo.less';
   函数组件「或者Hooks组件」不是类组件，所以没有实例的概念「调用组件不再是创建类的实例，而是把函数执行，产生一个私有上下文而已」，再所以，在函数组件中不涉及this的处理！！
  */
 const Demo = function Demo() {
-    let [num, setNum] = useState(0);
+  let [num, setNum] = useState(0);
 
-    const handle = () => {
-        setNum(num + 10);
-    };
-    return <div className="demo">
-        <span className="num">{num}</span>
-        <Button type="primary" size="small" onClick={handle}>新增</Button>
-    </div>;
+  const handle = () => {
+    setNum(num + 10);
+  };
+  return (
+    <div className="demo">
+      <span className="num">{num}</span>
+      <Button type="primary" size="small" onClick={handle}>
+        新增
+      </Button>
+    </div>
+  );
 };
 
 /* 
