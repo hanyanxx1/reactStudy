@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Button } from 'antd';
-import './Demo.less';
-import { flushSync } from 'react-dom';
+import { Button } from "antd";
+import "./Demo.less";
+import { flushSync } from "react-dom";
 
 /*
   useState自带了性能优化的机制：
@@ -11,26 +11,26 @@ import { flushSync } from 'react-dom';
 
 // 需求：让函数只更新一次，但是最后的结果是20
 const Demo = function Demo() {
-    console.log('RENDER渲染');
-    let [x, setX] = useState(10);
+  console.log("RENDER渲染");
+  let [x, setX] = useState(10);
 
-    const handle = () => {
-        for (let i = 0; i < 10; i++) {
-            setX(prev => {
-                // prev:存储上一次的状态值
-                console.log(prev);
-                return prev + 1; //返回的信息是我们要修改的状态值
-            });
-        }
-    };
-    return <div className="demo">
-        <span className="num">x:{x}</span>
-        <Button type="primary"
-            size="small"
-            onClick={handle}>
-            新增
-        </Button>
-    </div>;
+  const handle = () => {
+    for (let i = 0; i < 10; i++) {
+      setX((prev) => {
+        // prev:存储上一次的状态值
+        console.log(prev);
+        return prev + 1; //返回的信息是我们要修改的状态值
+      });
+    }
+  };
+  return (
+    <div className="demo">
+      <span className="num">x:{x}</span>
+      <Button type="primary" size="small" onClick={handle}>
+        新增
+      </Button>
+    </div>
+  );
 };
 
 export default Demo;
