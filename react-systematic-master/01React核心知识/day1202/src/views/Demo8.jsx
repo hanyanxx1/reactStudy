@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-import { Button } from 'antd';
-import './Demo.less';
+import { Button } from "antd";
+import "./Demo.less";
 
 const Demo = function Demo() {
-    // console.log('RENDER');
-    let [num, setNum] = useState(0);
+  // console.log('RENDER');
+  let [num, setNum] = useState(0);
 
-    /* useLayoutEffect(() => {
+  /* useLayoutEffect(() => {
         if (num === 0) {
             setNum(10);
         }
     }, [num]); */
 
-    /* 
+  /* 
      useLayoutEffect会阻塞浏览器渲染真实DOM，优先执行Effect链表中的callback；
      useEffect不会阻塞浏览器渲染真实DOM，在渲染真实DOM的同时，去执行Effect链表中的callback；
        + useLayoutEffect设置的callback要优先于useEffect去执行！！
@@ -29,25 +29,32 @@ const Demo = function Demo() {
          useEffect第四步操作和Effect链表中的方法执行，是同时进行的「异步操作」
        第四步：浏览器渲染和绘制真实DOM对象
     */
-    useLayoutEffect(() => {
-        console.log('useLayoutEffect'); //第一个输出
-    }, [num]);
-    useEffect(() => {
-        console.log('useEffect'); //第二个输出
-    }, [num]);
+  useLayoutEffect(() => {
+    console.log("useLayoutEffect"); //第一个输出
+  }, [num]);
+  useEffect(() => {
+    console.log("useEffect"); //第二个输出
+  }, [num]);
 
-    return <div className="demo"
-        style={{
-            backgroundColor: num === 0 ? 'red' : 'green'
-        }}>
-        <span className="num">{num}</span>
-        <Button type="primary" size="small"
-            onClick={() => {
-                setNum(0);
-            }}>
-            新增
-        </Button>
-    </div>;
+  return (
+    <div
+      className="demo"
+      style={{
+        backgroundColor: num === 0 ? "red" : "green",
+      }}
+    >
+      <span className="num">{num}</span>
+      <Button
+        type="primary"
+        size="small"
+        onClick={() => {
+          setNum(0);
+        }}
+      >
+        新增
+      </Button>
+    </div>
+  );
 };
 
 export default Demo;
