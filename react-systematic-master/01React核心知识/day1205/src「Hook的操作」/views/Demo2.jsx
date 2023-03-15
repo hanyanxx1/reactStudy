@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { Button } from 'antd';
-import './Demo.less';
+import { Button } from "antd";
+import "./Demo.less";
 
 /* 子组件 */
 /* class Child extends React.PureComponent {
@@ -13,10 +13,8 @@ import './Demo.less';
 } */
 
 const Child = React.memo(function Child(props) {
-    console.log('Child Render');
-    return <div>
-        我是子组件
-    </div>;
+  console.log("Child Render");
+  return <div>我是子组件</div>;
 });
 
 /* 父组件 */
@@ -24,22 +22,25 @@ const Child = React.memo(function Child(props) {
 //   + 第一条：传递给子组件的属性（函数），每一次需要是相同的堆内存地址(是一致的) . 基于useCallback处理！！
 //   + 第二条：在子组件内部也要做一个处理，验证父组件传递的属性是否发生改变，如果没有变化，则让子组件不能更新，有变化才需要更新 . 继承React.PureComponent即可「在shouldComponentUpdate中对新老属性做了浅比较」!! 函数组件是基于 React.memo 函数，对新老传递的属性做比较，如果不一致，才会把函数组件执行，如果一致，则不让子组件更新！！
 const Demo = function Demo() {
-    let [x, setX] = useState(0);
+  let [x, setX] = useState(0);
 
-    // const handle = () => { };  //第一次:0x001  第二次:0x101  第三次:0x201 ...
-    const handle = useCallback(() => { }, []); //第一次:0x001  第二次:0x001  第三次:0x001 ...
+  // const handle = () => { };  //第一次:0x001  第二次:0x101  第三次:0x201 ...
+  const handle = useCallback(() => {}, []); //第一次:0x001  第二次:0x001  第三次:0x001 ...
 
-    return <div className="vote-box">
-        <Child handle={handle} />
-        <div className="main">
-            <p>{x}</p>
-        </div>
-        <div className="footer">
-            <Button type="primary" onClick={() => setX(x + 1)}>累加</Button>
-        </div>
-    </div>;
+  return (
+    <div className="vote-box">
+      <Child handle={handle} />
+      <div className="main">
+        <p>{x}</p>
+      </div>
+      <div className="footer">
+        <Button type="primary" onClick={() => setX(x + 1)}>
+          累加
+        </Button>
+      </div>
+    </div>
+  );
 };
-
 
 /* let prev;
 const Demo = function Demo() {
