@@ -1,29 +1,29 @@
 .box {
-    background: lightblue;
+  background: lightblue;
 }
 
 .box .title {
-    font-size: 20px;
-    color: lightcoral;
+  font-size: 20px;
+  color: lightcoral;
 }
 
 .list {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .list a {
-    color: #000;
+  color: #000;
 }
 
 .list a:hover {
-    color: red;
+  color: red;
 }
 
 .link {
-    composes: list;
-    color: lightcoral;
+  composes: list;
+  color: lightcoral;
 }
 
 :global(.clearfix) {
-    clear: both;
+  clear: both;
 }
