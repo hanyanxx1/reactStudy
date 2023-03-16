@@ -5,23 +5,21 @@ React高阶组件：利用JS中的闭包「柯理化函数」实现的组件代�
 import React from "react";
 
 const Demo = function Demo(props) {
-    console.log('Demo中的属性:', props);
-    return <div className="demo">
-        我是DEMO
-    </div>;
+  console.log("Demo中的属性:", props);
+  return <div className="demo">我是DEMO</div>;
 };
 
 // 执行ProxyTest方法，传递一个组件进来「Component」
 const ProxyTest = function ProxyTest(Component) {
-    // Component->Demo
-    return function HOC(props) {
-        let isUse = false;
-        // console.log(props); //=>{x:10,y:20,enable:true}
-        // 真实要渲染的是Demo组件：把获取的props要传递给Demo
-        /* let { x, y, enable } = props;
+  // Component->Demo
+  return function HOC(props) {
+    let isUse = false;
+    // console.log(props); //=>{x:10,y:20,enable:true}
+    // 真实要渲染的是Demo组件：把获取的props要传递给Demo
+    /* let { x, y, enable } = props;
         return <Component x={x} y={y} enable={enable} />; */
-        return <Component {...props} isUse={isUse} />
-    };
+    return <Component {...props} isUse={isUse} />;
+  };
 };
 
 export default ProxyTest(Demo);

@@ -1,5 +1,5 @@
 import React from "react";
-import { createUseStyles } from 'react-jss';
+import { createUseStyles } from "react-jss";
 /* 
 基于createUseStyles方法，构建组件需要的样式；返回结果是一个自定义Hook函数！ 
   + 对象中的每个成员就是创建的样式类名
@@ -28,40 +28,42 @@ import { createUseStyles } from 'react-jss';
 相对于CSSModules的好处：因为样式是写在JS中的，我们就可以基于一些逻辑操作，实现样式的动态化管理！！
 */
 const useStyles = createUseStyles({
-    box: {
-        backgroundColor: 'lightblue',
-        width: '300px'
+  box: {
+    backgroundColor: "lightblue",
+    width: "300px",
+  },
+  title: {
+    fontSize: "20px",
+    color: "red",
+    "&:hover": {
+      color: (props) => props.color,
     },
-    title: {
-        fontSize: '20px',
-        color: 'red',
-        '&:hover': {
-            color: props => props.color
-        }
-    },
-    list: props => {
-        return {
-            '& a': {
-                fontSize: props.size + 'px',
-                color: '#000'
-            }
-        };
-    }
+  },
+  list: (props) => {
+    return {
+      "& a": {
+        fontSize: props.size + "px",
+        color: "#000",
+      },
+    };
+  },
 });
 
 const Nav = function Nav() {
-    let { box, title, list } = useStyles({
-        size: 14,
-        color: 'orange'
-    });
-    return <nav className={box}>
-        <h2 className={title}>购物商城</h2>
-        <div className={list}>
-            <a href="">首页</a>
-            <a href="">秒杀</a>
-            <a href="">我的</a>
-        </div>
-    </nav>;
+  let { box, title, list } = useStyles({
+    size: 14,
+    color: "orange",
+  });
+  return (
+    <nav className={box}>
+      <h2 className={title}>购物商城</h2>
+      <div className={list}>
+        <a href="">首页</a>
+        <a href="">秒杀</a>
+        <a href="">我的</a>
+      </div>
+    </nav>
+  );
 };
 
 export default Nav;
