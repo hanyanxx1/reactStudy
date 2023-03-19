@@ -1,6 +1,6 @@
-import qs from 'qs';
-import { message } from 'antd';
-import http from './api/http2';
+import qs from "qs";
+import { message } from "antd";
+import http from "./api/http2";
 
 /* 
  向服务器发送数据请求的方案：
@@ -139,7 +139,6 @@ p.then(response => {
     });
 }); */
 
-
 /* fetch中的请求中断 */
 /* let ctrol = new AbortController();
 fetch('/api/getTaskList', {
@@ -162,7 +161,6 @@ fetch('/api/getTaskList', {
 // 立即中断请求
 // ctrol.abort(); */
 
-
 /* let ctrol = new AbortController();
 http.get('/api/getTaskList', {
     params: {
@@ -173,7 +171,6 @@ http.get('/api/getTaskList', {
     console.log('成功：', value);
 });
 ctrol.abort(); */
-
 
 /* document.body.addEventListener('click', function () {
     http.post('/api/addTask', {
