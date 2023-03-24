@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React v16 实现（rAF + postMessage）</title>
+  </head>
+  <body></body>
+  <script>
+    // Polyfill requestIdleCallback.
+    var scheduledRICCallback = null;
+    var frameDeadline = 0;
+    // 假设 30fps，一秒就是 33ms
+    var activeFrameTime = 33;
+
+    var frameDeadlineObject = {
+      timeRemaining: function () {
+        return frameDeadline - performance.now();
+      },
+    };
+
+    var idleTick = function (event) {
+      scheduledRICCallback(frameDeadlineObject);
+    };
+
+    window.addEventListener("message", idleTick, false);
+
+    var animationTick = function (rafTime) {
+      frameDeadline = rafTime + activeFrameTime;
+      console.log("1frameDeadline:", frameDeadline);
+      console.log("1performance:", performance.now());
+      console.log(
+        "1frameDeadline - performance:",
+        frameDeadline - performance.now()
+      );
+      window.postMessage("__reactIdleCallback$1", "*");
+    };
+
+    var rIC = function (callback) {
+      scheduledRICCallback = callback;
+      console.log("111");
+      requestAnimationFrame(animationTick);
+      console.log("222");
+      return 0;
+    };
+
+    rIC((deadLine) => {
+      console.log("2frameDeadline:", frameDeadline);
+      console.log("2performance:", performance.now());
+      console.log("2frameDeadline - performance:", deadLine.timeRemaining());
+    });
+  </script>
+</html>

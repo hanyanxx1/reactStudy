@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestAnimationFrame</title>
+  </head>
+  <body>
+    <div>
+      <button id="start" style="margin-bottom: 10px">开始</button>
+      <button id="stop" style="margin-bottom: 10px">停止</button>
+      <div
+        id="test"
+        style="width: 100px; height: 100px; background-color: #333"
+      />
+    </div>
+  </body>
+  <script>
+    const test = document.querySelector("#test");
+    let previousTimeStamp = 0;
+
+    document.querySelector("button").addEventListener("click", () => {
+      requestAnimationFrame(animation);
+    });
+
+    let count = 0;
+    function animation(timestamp) {
+      if (count > 200) return;
+
+      const elapsed = timestamp - previousTimeStamp;
+      if (elapsed > 30) {
+        test.style.marginLeft = `${count}px`;
+        count++;
+        previousTimeStamp = timestamp;
+        // console.log(elapsed);
+      }
+
+      requestAnimationFrame(animation);
+    }
+  </script>
+</html>

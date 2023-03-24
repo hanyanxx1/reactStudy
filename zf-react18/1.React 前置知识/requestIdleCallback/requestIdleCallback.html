@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestIdleCallback</title>
+  </head>
+  <body></body>
+  <script>
+    // 参考 MDN Background Tasks API 这篇文章
+    // https://developer.mozilla.org/zh-CN/docs/Web/API/Background_Tasks_API#example
+
+    const sleep = (delay) => {
+      for (let start = Date.now(); Date.now() - start <= delay; ) {}
+    };
+
+    let taskHandle = null;
+    let taskList = [
+      () => {
+        console.log("task1");
+        sleep(50);
+      },
+      () => {
+        console.log("task2");
+        sleep(50);
+      },
+      () => {
+        console.log("task3");
+        sleep(50);
+      },
+    ];
+
+    function runTaskQueue(deadline) {
+      console.log(`deadline: ${deadline.timeRemaining()}`);
+      while (
+        (deadline.timeRemaining() > 0 || deadline.didTimeout) &&
+        taskList.length
+      ) {
+        let task = taskList.shift();
+        task();
+      }
+
+      if (taskList.length) {
+        taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+      } else {
+        taskHandle = 0;
+      }
+    }
+
+    requestIdleCallback(runTaskQueue, { timeout: 1000 });
+  </script>
+</html>

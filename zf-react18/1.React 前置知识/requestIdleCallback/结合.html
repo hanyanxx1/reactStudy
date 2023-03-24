@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>结合</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div>
+      <div id="startButton">开始</div>
+
+      <div id="log"></div>
+    </div>
+  </body>
+  <script>
+    let logFragment = null;
+    function log(text) {
+      if (!logFragment) {
+        logFragment = document.createDocumentFragment();
+      }
+
+      let el = document.createElement("div");
+      el.innerHTML = text;
+      logFragment.appendChild(el);
+    }
+
+    function getRandomIntInclusive(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值
+    }
+
+    let taskHandle = null;
+    let statusRefreshScheduled = false;
+
+    let taskList = [
+      () => {
+        log("task1");
+      },
+      () => {
+        log("task2");
+      },
+      () => {
+        log("task3");
+      },
+    ];
+
+    function addTask() {
+      let n = getRandomIntInclusive(1, 3);
+      for (var i = 0; i < n; i++) {
+        enqueueTask(
+          ((i, n) => {
+            return () => log(`task num ${i + 1} of list ${n}`);
+          })(i, n)
+        );
+      }
+    }
+
+    function enqueueTask(fn) {
+      taskList.push(fn);
+
+      // taskHandle 表示对当前处理中任务的一个引用
+      if (!taskHandle) {
+        taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+      }
+    }
+
+    function runTaskQueue(deadline) {
+      console.log(`deadline: ${deadline.timeRemaining()}`);
+      while (
+        (deadline.timeRemaining() > 0 || deadline.didTimeout) &&
+        taskList.length
+      ) {
+        let task = taskList.shift();
+        task();
+
+        scheduleStatusRefresh();
+      }
+
+      if (taskList.length) {
+        taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+      } else {
+        taskHandle = 0;
+      }
+    }
+    // 安排 DOM 的改变
+    function scheduleStatusRefresh() {
+      if (!statusRefreshScheduled) {
+        requestAnimationFrame(updateDisplay);
+        statusRefreshScheduled = true;
+      }
+    }
+    // 负责绘制内容
+    let logElem = document.getElementById("log");
+    function updateDisplay(time) {
+      if (logFragment) {
+        logElem.appendChild(logFragment);
+        logFragment = null;
+      }
+
+      statusRefreshScheduled = false;
+    }
+
+    document
+      .getElementById("startButton")
+      .addEventListener("click", addTask, false);
+  </script>
+
+  <!-- <script>
+    let taskHandle = null;
+    let statusRefreshScheduled = false;
+
+    let taskList = [
+      () => {
+        log("task1");
+      },
+      () => {
+        log("task2");
+      },
+      () => {
+        log("task3");
+      },
+    ];
+
+    function getRandomIntInclusive(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值
+    }
+
+    let logFragment = null;
+    function log(text) {
+      if (!logFragment) {
+        logFragment = document.createDocumentFragment();
+      }
+
+      let el = document.createElement("div");
+      el.innerHTML = text;
+      logFragment.appendChild(el);
+    }
+
+    function addTask() {
+      let n = getRandomIntInclusive(1, 3);
+      for (var i = 0; i < n; i++) {
+        enqueueTask(
+          ((i, n) => {
+            return () => log(`task num ${i + 1} of list ${n}`);
+          })(i, n)
+        );
+      }
+    }
+
+    function enqueueTask(fn) {
+      taskList.push(fn);
+
+      // taskHandle 表示对当前处理中任务的一个引用
+      if (!taskHandle) {
+        taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+      }
+    }
+
+    function runTaskQueue(deadline) {
+      console.log(`deadline: ${deadline.timeRemaining()}`);
+
+      while (
+        (deadline.timeRemaining() > 0 || deadline.didTimeout) &&
+        taskList.length
+      ) {
+        let task = taskList.shift();
+        task();
+
+        scheduleStatusRefresh();
+      }
+
+      if (taskList.length) {
+        taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+      } else {
+        taskHandle = 0;
+      }
+    }
+
+    function scheduleStatusRefresh() {
+      if (!statusRefreshScheduled) {
+        requestAnimationFrame(updateDisplay);
+        statusRefreshScheduled = true;
+      }
+    }
+
+    let logElem = document.getElementById("log");
+    function updateDisplay(item) {
+      if (logFragment) {
+        logElem.appendChild(logFragment);
+        logFragment = null;
+      }
+
+      statusRefreshScheduled = false;
+    }
+
+    document
+      .getElementById("startButton")
+      .addEventListener("click", addTask, false);
+  </script> -->
+</html>
