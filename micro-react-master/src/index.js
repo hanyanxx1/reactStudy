@@ -1,7 +1,4 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-
-import { createElement } from "./micro-react";
+import { createElement, render } from "./micro-react";
 
 const element = createElement(
   "h1",
@@ -10,7 +7,4 @@ const element = createElement(
   createElement("h2")
 );
 
-console.log(element);
-
-// const root = ReactDOM.createRoot(document.getElementById("root"));
-// root.render(element);
+render(element, document.getElementById("root"));
