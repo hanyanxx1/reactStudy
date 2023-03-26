@@ -12,11 +12,24 @@ function render(element, container) {
       dom[name] = element.props[name];
     });
 
-  element.props.children.forEach((child) => {
-    render(child, dom);
-  });
-
   container.append(dom);
+}
+
+let nextUnitOfWork = null;
+
+function workLoop(deadline) {
+  let shouldYield = false;
+  while (nextUnitOfWork && !shouldYield) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    shouldYield = deadline.timeRemaining() < 1;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
+
+function performUnitOfWork(fiber) {
 }
 
 export default render;
