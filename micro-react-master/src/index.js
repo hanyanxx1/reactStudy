@@ -1,4 +1,5 @@
 import { createElement, render } from "./micro-react";
+import { useState } from "./micro-react/render";
 
 // const element = createElement(
 //   "div",
@@ -40,18 +41,21 @@ const container = document.querySelector("#root");
 
 // renderer('Hello');
 
-const App = (props) => {
-  return createElement("h1", null, "Hi", props.name);
-};
-
-// const Counter = () => {
-//   const [state, setState] = useState(1);
-//   return createElement(
-//     'h1',
-//     { onclick: () => setState((prev) => prev + 1) },
-//     state
-//   );
+// const App = (props) => {
+//   return createElement("h1", null, "Hi", props.name);
 // };
 
-const element = createElement(App, { name: "kelvin" });
+// const element = createElement(App, { name: "kelvin" });
+
+const Counter = () => {
+  const [state, setState] = useState(1);
+  return createElement(
+    "h1",
+    { onclick: () => setState((prev) => prev + 1) },
+    state
+  );
+};
+
+const element = createElement(Counter, { name: "kelvin" });
+
 render(element, container);
