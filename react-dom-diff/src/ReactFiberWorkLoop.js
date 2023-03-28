@@ -1,4 +1,5 @@
 import { createWorkInProgress } from "./ReactFiber";
+import { beginWork } from "./ReactFiberBeginWork";
 //当前正在更新的根
 let workInProgressRoot = null;
 //当前正在更新fiber节点
@@ -19,15 +20,51 @@ export function scheduleUpdateOnFiber(fiber) {
 function performSyncWorkOnRoot(fiberRoot) {
   workInProgressRoot = fiberRoot;
   workInProgress = createWorkInProgress(workInProgressRoot.current);
-  console.log(workInProgress);
+  workLoopSync();
+}
+
+/**
+ * 开始自上而下的构建新fiber树
+ */
+function workLoopSync() {
+  while (workInProgress) {
+    performUnitOfWork(workInProgress);
+  }
+}
+
+/**
+ * 执行工作单元
+ * @param {} workInProgress 要处理的fiber
+ */
+function performUnitOfWork(unitOfWork) {
+  //获取当前正在构建的fiber的替身
+  const current = workInProgress.alternate;
+  //开始构建当前fiber的子fiber链表
+  //它会返回下一个要处理的fiber,一般都是unitofWork的大儿子
+  // div#title这个fiber 它的返回值是一个null
+  let next = beginWork(current, unitOfWork);
+  //在beginWork后，需要把新属性同步到老属性上
+  //div id =1 memoizedProps={id:2}  pendingProps={id:2}
+  unitOfWork.memoizedProps = unitOfWork.pendingProps;
+  //当前的fiber还有子节点
+  if (next) {
+    workInProgress = next;
+  } else {
+    //如果当前的fiber没有子fiber，那么当前的fiber就算完成
+    completeUnitOfWork(unitOfWork);
+  }
+}
+
+function completeUnitOfWork(unitOfWork) {
+  console.log(unitOfWork);
 }
 
 function markUpdateLaneFromFiberToRoot(sourceFiber) {
   let node = sourceFiber;
-  let parent = node.parent;
+  let parent = node.return;
   while (parent) {
     node = parent;
-    parent = node.parent;
+    parent = parent.return;
   }
   //node其实肯定fiber树的根节点，其实就是hostRootFiber .stateNode div#root
   return node.stateNode;
