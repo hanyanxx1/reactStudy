@@ -1,7 +1,7 @@
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
-import { Placement, Update } from "./ReactFiberFlags";
+import { Placement, Update, Deletion } from "./ReactFiberFlags";
 import {
   commitPlacement,
   commitWork,
@@ -41,6 +41,10 @@ function getFlags(flags) {
   switch (flags) {
     case Placement:
       return "插入";
+    case Deletion:
+      return "删除";
+    case Update:
+      return "更新";
     default:
       return;
   }
@@ -52,7 +56,7 @@ function commitMutationEffects(root) {
   while (nextEffect) {
     effectListList += `(${getFlags(nextEffect.flags)}#${nextEffect.type}#${
       nextEffect.key
-    })`;
+    })=>`;
     const flags = nextEffect.flags;
     let current = nextEffect.alternate;
     if (flags === Placement) {

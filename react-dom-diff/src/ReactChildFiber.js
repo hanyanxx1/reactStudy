@@ -103,6 +103,41 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     return newFiber;
   }
+  function createChild(returnFiber, newChild) {
+    const created = createFiberFromElement(newChild);
+    created.return = returnFiber;
+    return created;
+  }
+  /**
+   * 如果新的虚拟DOM是一个数组的话，也就是说有多个儿子的话
+   * @param {*} returnFiber ul
+   * @param {*} currentFirstChild null
+   * @param {*} newChild [liA,liB,liC]
+   */
+  function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
+    //将要返回的第一个新fiber
+    let resultingFirstChild = null;
+    //上一个新fiber
+    let previousNewFiber = null;
+    //第一个老fiber
+    let oldFiber = currentFirstChild;
+    //新的虚拟DOM的索引
+    let newIdx = 0;
+    //如果没有老fiber了
+    if (!oldFiber) {
+      // 循环虚拟DOM数组，为每个虚拟DOM创建一个新的fiber
+      for (; newIdx < newChildren.length; newIdx++) {
+        const newFiber = createChild(returnFiber, newChildren[newIdx]); //li(C)
+        if (!previousNewFiber) {
+          resultingFirstChild = newFiber; //li(A)
+        } else {
+          previousNewFiber.sibling = newFiber; //li(B).sibling=li(C)
+        }
+        previousNewFiber = newFiber; //previousNewFiber=>li(C)
+      }
+    }
+    return resultingFirstChild;
+  }
   /**
    * 构建新的子Fiber
    * @param {*} returnFiber 新的父fiber
@@ -114,14 +149,14 @@ function ChildReconciler(shouldTrackSideEffects) {
     const isObject = typeof newChild === "object" && newChild;
     // 说明新的虚拟DOM是单节点
     if (isObject) {
-      switch (newChild.$$typeof) {
-        case REACT_ELEMENT_TYPE:
-          return placeSingleChild(
-            reconcileSingleElement(returnFiber, currentFirstChild, newChild)
-          );
-        default:
-          return;
+      if (newChild.$$typeof === REACT_ELEMENT_TYPE) {
+        return placeSingleChild(
+          reconcileSingleElement(returnFiber, currentFirstChild, newChild)
+        );
       }
+    }
+    if (Array.isArray(newChild)) {
+      return reconcileChildrenArray(returnFiber, currentFirstChild, newChild);
     }
   }
   return reconcileChildFibers;

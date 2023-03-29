@@ -1,5 +1,6 @@
 import { HostComponent } from "./ReactWorkTags";
 import {
+  appendChild,
   createInstance,
   finalizeInitialChildren,
   prepareUpdate,
@@ -23,6 +24,7 @@ export function completeWork(currnet, workInProgress) {
         const type = workInProgress.type; //div,span,p
         //创建此fiber的真实DOM
         const instance = createInstance(type, newProps);
+        appendAllChildren(instance, workInProgress);
         //让此Fiber的真实DOM属性指向instance
         workInProgress.stateNode = instance;
         //给真实DOM添加属性包括如果独生子是字符串或数字的情况
@@ -31,6 +33,16 @@ export function completeWork(currnet, workInProgress) {
       break;
     default:
       break;
+  }
+}
+function appendAllChildren(parent, workInProgress) {
+  let node = workInProgress.child;
+  while (node) {
+    if (node.tag === HostComponent) {
+      //把大儿子的真实DOM节点添加到父真实DOM上
+      appendChild(parent, node.stateNode);
+    }
+    node = node.sibling;
   }
 }
 

@@ -72,7 +72,7 @@ export function reconcileChildren(current, workInProgress, nextChildren) {
     // 初次渲染，不需要比较，全是新的
     workInProgress.child = mountChildFibers(
       workInProgress, //新fiber
-      current && current.child, // 老fiber的第一个子fiber节点
+      null, // 老fiber的第一个子fiber节点
       nextChildren //新的虚拟DOM
     );
   }
