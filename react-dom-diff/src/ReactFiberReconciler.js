@@ -14,6 +14,7 @@ export function updateContainer(element, container) {
   const update = createUpdate();
   //element = <div key="title" id="title">title</div>
   update.payload = { element };
+  //把更新添加到fiber的更新队列里
   enqueueUpdate(current, update);
   scheduleUpdateOnFiber(current);
 }

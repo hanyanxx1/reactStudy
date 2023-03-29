@@ -2,7 +2,8 @@ import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
 import { Placement } from "./ReactFiberFlags";
-import { HostComponent, HostRoot } from "./ReactWorkTags";
+import { commitPlacement } from "./ReactFiberCommitWork";
+
 //当前正在更新的根
 let workInProgressRoot = null;
 //当前正在更新fiber节点
@@ -57,23 +58,6 @@ function commitMutationEffects(root) {
   effectListList += "null";
   console.log(effectListList);
   root.current = finishedWork;
-}
-function getParentStateNode(fiber) {
-  let parent = fiber.return;
-  do {
-    if (parent.tag === HostComponent) {
-      return parent.stateNode;
-    } else if (parent.tag === HostRoot) {
-      return parent.stateNode.containerInfo;
-    } else {
-      parent = parent.return;
-    }
-  } while (parent);
-}
-function commitPlacement(nextEffect) {
-  let stateNode = nextEffect.stateNode;
-  let parentStateNode = getParentStateNode(nextEffect);
-  parentStateNode.appendChild(stateNode);
 }
 /**
  * 开始自上而下的构建新fiber树
