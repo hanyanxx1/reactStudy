@@ -1,7 +1,12 @@
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
-import { Placement, Update, Deletion } from "./ReactFiberFlags";
+import {
+  Placement,
+  Update,
+  Deletion,
+  PlacementAndUpdate,
+} from "./ReactFiberFlags";
 import {
   commitPlacement,
   commitWork,
@@ -45,6 +50,8 @@ function getFlags(flags) {
       return "删除";
     case Update:
       return "更新";
+    case PlacementAndUpdate:
+      return "移动";
     default:
       return;
   }
@@ -61,6 +68,12 @@ function commitMutationEffects(root) {
     let current = nextEffect.alternate;
     if (flags === Placement) {
       commitPlacement(nextEffect);
+    } else if (flags === PlacementAndUpdate) {
+      // 0110 = 6
+      commitPlacement(nextEffect);
+      //相当于把Placement从nextEffect.flags中删除出去
+      nextEffect.flags &= ~Placement; // Update 0010
+      commitWork(current, nextEffect);
     } else if (flags === Update) {
       commitWork(current, nextEffect);
     } else {

@@ -108,6 +108,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     created.return = returnFiber;
     return created;
   }
+  //如果有老的更新老的，没有老的，返回新的
   function updateElement(returnFiber, oldFiber, newChild) {
     if (oldFiber) {
       if (oldFiber.type === newChild.type) {
@@ -131,18 +132,32 @@ function ChildReconciler(shouldTrackSideEffects) {
       return null;
     }
   }
-  function placeChild(newFiber, newIdx) {
-    newFiber.newIdx = newIdx;
+  function placeChild(newFiber, lastPlacedIndex, newIdx) {
+    newFiber.index = newIdx;
     if (!shouldTrackSideEffects) {
-      return;
+      return lastPlacedIndex;
     }
     const current = newFiber.alternate;
     //如果有current说是更新，复用老节点的更新，不会添加Placement
     if (current) {
-      //TODO现在是只处理初次挂载，更新情况我们暂不处理
+      const oldIndex = current.index;
+      //6.如果老fiber它对应的真实DOM挂载的索引比lastplacedIndex小
+      if (oldIndex < lastPlacedIndex) {
+        //7.如果小于lastPlacedIndex则需要移动考fber，lastPlacedIndex不变
+        newFiber.flags |= Placement;
+        return lastPlacedIndex;
+      } else {
+        //8.如果大于lastPlacedIndex则不需要移动老fiber,更新lastPlacedIndex为老fiber的index
+        return oldIndex;
+      }
     } else {
       newFiber.flags = Placement;
+      return lastPlacedIndex;
     }
+  }
+  function updateFromMap(existingChildren, returnFiber, newIdx, newChild) {
+    const matchedFiber = existingChildren.get(newChild.key || newIdx);
+    return updateElement(returnFiber, matchedFiber, newChild);
   }
   /**
    * 如果新的虚拟DOM是一个数组的话，也就是说有多个儿子的话
@@ -162,6 +177,9 @@ function ChildReconciler(shouldTrackSideEffects) {
     //新的虚拟DOM的索引
     let newIdx = 0;
     // 处理更新的情况 ,老fiber和新的fiber都存在
+    //3.然后声明一个lastPlacedIndex变量，表示不需要移动的老节点的索引,默认为0
+    let lastPlacedIndex = 0;
+    //处理更新的情况，老fiber和新fiber都存在
     for (; oldFiber && newIdx < newChildren.length; newIdx++) {
       nextOldFiber = oldFiber.sibling;
       //试图复用老fiber
@@ -173,7 +191,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         deleteChild(returnFiber, oldFiber);
       }
       //核心是给当前的newFiber 添加一个副作用flags,叫新增
-      placeChild(newFiber, newIdx);
+      lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
       if (!previousNewFiber) {
         resultingFirstChild = newFiber;
       } else {
@@ -191,7 +209,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // 循环虚拟DOM数组，为每个虚拟DOM创建一个新的fiber
       for (; newIdx < newChildren.length; newIdx++) {
         const newFiber = createChild(returnFiber, newChildren[newIdx]); //li(C)
-        placeChild(newFiber, newIdx);
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
         if (!previousNewFiber) {
           resultingFirstChild = newFiber; //li(A)
         } else {
@@ -200,7 +218,47 @@ function ChildReconciler(shouldTrackSideEffects) {
         previousNewFiber = newFiber; //previousNewFiber=>li(C)
       }
     }
+    //1.第一轮比较A和A，相同可以复用，更新，然后比较B和C，key不同直接跳出第一个循环
+    //如果key不同，且oldFiber不为空，将剩下的老fiber放入map中
+    const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
+    // 4.继续循环剩下的虚拟DOM节点，从C开始
+    for (; newIdx < newChildren.length; newIdx++) {
+      //5.如果能在map中找到相同key相同type的节点则可以复用老fber,并把此老fber从map中刚除
+      const newFiber = updateFromMap(
+        existingChildren,
+        returnFiber,
+        newIdx,
+        newChildren[newIdx]
+      );
+      if (newFiber) {
+        //说明是复用的老fiber
+        if (newFiber.alternate) {
+          existingChildren.delete(newFiber.key || newIdx);
+        }
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+        if (!previousNewFiber) {
+          resultingFirstChild = newFiber; //li(A)
+        } else {
+          previousNewFiber.sibling = newFiber; //li(B).sibling=li(C)
+        }
+        previousNewFiber = newFiber; //previousNewFiber=>li(C)
+      }
+    }
+    //9.虚拟DOM循环结束后把map中所有的剩下的fiber全部标记为删除
+    existingChildren.forEach((child) => deleteChild(returnFiber, child));
     return resultingFirstChild;
+  }
+  function mapRemainingChildren(returnFiber, currentFirstChild) {
+    //2.把乘 下oldFiber的放入existingChildren这个map中
+    //existingChildren={B:bFiber,C:CFiber,D:dFiber,E:eFiber,F:fFiber}
+    const existingChildren = new Map();
+    let existingChild = currentFirstChild;
+    while (existingChild) {
+      let key = existingChild.key || existingChild.index;
+      existingChildren.set(key, existingChild);
+      existingChild = existingChild.sibling;
+    }
+    return existingChildren;
   }
   /**
    * 构建新的子Fiber

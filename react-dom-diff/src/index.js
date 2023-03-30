@@ -170,3 +170,36 @@ document.querySelector("#multi3Update").addEventListener("click", () => {
   );
   ReactDOM.render(element, root);
 });
+
+//9.多个节点数量不同、key不同
+document.querySelector("#multi5").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B">
+        B
+      </li>
+      <li key="C">C</li>
+      <li key="D">D</li>
+      <li key="E">E</li>
+      <li key="F">F</li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+document.querySelector("#multi5Update").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="C">C</li>
+      <li key="E">E</li>
+      <li key="B" id="B2">
+        B2
+      </li>
+      <li key="G">G</li>
+      <li key="D">D</li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
