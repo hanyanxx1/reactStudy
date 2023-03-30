@@ -108,6 +108,42 @@ function ChildReconciler(shouldTrackSideEffects) {
     created.return = returnFiber;
     return created;
   }
+  function updateElement(returnFiber, oldFiber, newChild) {
+    if (oldFiber) {
+      if (oldFiber.type === newChild.type) {
+        const existing = multiplexProps(oldFiber, newChild.props);
+        existing.return = returnFiber;
+        return existing;
+      }
+    }
+    //如果没有老fiber
+    const created = createFiberFromElement(newChild);
+    created.return = returnFiber;
+    return created;
+  }
+  function updateSlot(returnFiber, oldFiber, newChild) {
+    const key = oldFiber ? oldFiber.key : null;
+    //如果新的虚拟DoM的key和老fiber的key一样
+    if (newChild.key === key) {
+      return updateElement(returnFiber, oldFiber, newChild);
+    } else {
+      //如果key不一样，直接结束返回null
+      return null;
+    }
+  }
+  function placeChild(newFiber, newIdx) {
+    newFiber.newIdx = newIdx;
+    if (!shouldTrackSideEffects) {
+      return;
+    }
+    const current = newFiber.alternate;
+    //如果有current说是更新，复用老节点的更新，不会添加Placement
+    if (current) {
+      //TODO现在是只处理初次挂载，更新情况我们暂不处理
+    } else {
+      newFiber.flags = Placement;
+    }
+  }
   /**
    * 如果新的虚拟DOM是一个数组的话，也就是说有多个儿子的话
    * @param {*} returnFiber ul
@@ -119,15 +155,43 @@ function ChildReconciler(shouldTrackSideEffects) {
     let resultingFirstChild = null;
     //上一个新fiber
     let previousNewFiber = null;
-    //第一个老fiber
+    //当前的老fiber
     let oldFiber = currentFirstChild;
+    //下一个老fiber
+    let nextOldFiber = null;
     //新的虚拟DOM的索引
     let newIdx = 0;
+    // 处理更新的情况 ,老fiber和新的fiber都存在
+    for (; oldFiber && newIdx < newChildren.length; newIdx++) {
+      nextOldFiber = oldFiber.sibling;
+      //试图复用老fiber
+      const newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx]);
+      //如果key不一样 ，跳出第一轮循环
+      if (!newFiber) break;
+      //老fiber存在，但是新的fiber并没有复用老fiber
+      if (oldFiber && !newFiber.alternate) {
+        deleteChild(returnFiber, oldFiber);
+      }
+      //核心是给当前的newFiber 添加一个副作用flags,叫新增
+      placeChild(newFiber, newIdx);
+      if (!previousNewFiber) {
+        resultingFirstChild = newFiber;
+      } else {
+        previousNewFiber.sibling = newFiber;
+      }
+      previousNewFiber = newFiber;
+      oldFiber = nextOldFiber;
+    }
+    if (newIdx === newChildren.length) {
+      deleteRemainingChildren(returnFiber, oldFiber);
+      return resultingFirstChild;
+    }
     //如果没有老fiber了
     if (!oldFiber) {
       // 循环虚拟DOM数组，为每个虚拟DOM创建一个新的fiber
       for (; newIdx < newChildren.length; newIdx++) {
         const newFiber = createChild(returnFiber, newChildren[newIdx]); //li(C)
+        placeChild(newFiber, newIdx);
         if (!previousNewFiber) {
           resultingFirstChild = newFiber; //li(A)
         } else {

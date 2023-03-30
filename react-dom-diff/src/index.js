@@ -84,3 +84,89 @@ document.querySelector("#single4Update").addEventListener("click", () => {
   );
   ReactDOM.render(element, root);
 });
+
+//多节点
+//5.多个节点的数量，类型和key全部相同，只更新属性
+document.querySelector("#multi1").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B">
+        B
+      </li>
+      <li key="C" id="C">
+        C
+      </li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+document.querySelector("#multi1Update").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <p key="B" id="B2">
+        B2
+      </p>
+      <li key="C" id="C2">
+        C2
+      </li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+//6.多个节点的类型和key全部相同，有新增元素
+document.querySelector("#multi2").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B">
+        B
+      </li>
+      <li key="C">C</li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+document.querySelector("#multi2Update").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B2">
+        B2
+      </li>
+      <li key="C">C</li>
+      <li key="D">D</li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+//7.多个节点的类型和key全部相同，有删除元素
+document.querySelector("#multi3").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B">
+        B
+      </li>
+      <li key="C">C</li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
+
+document.querySelector("#multi3Update").addEventListener("click", () => {
+  let element = (
+    <ul key="ul">
+      <li key="A">A</li>
+      <li key="B" id="B2">
+        B2
+      </li>
+    </ul>
+  );
+  ReactDOM.render(element, root);
+});
