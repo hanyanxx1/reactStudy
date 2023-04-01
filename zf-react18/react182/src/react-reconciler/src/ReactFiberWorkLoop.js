@@ -1,6 +1,7 @@
 import { scheduleCallback } from "scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
+import { completeWork } from "./ReactFiberCompleteWork";
 
 let workInProgress = null;
 export function scheduleUpdateOnFiber(root) {
@@ -31,9 +32,24 @@ function performUnitOfWork(unitOfWork) {
   const next = beginWork(current, unitOfWork);
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
-    //completeUnitOfWork(unitOfWork);
-    workInProgress = null;
+    completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
   }
+}
+
+function completeUnitOfWork(unitOfWork) {
+  let completedWork = unitOfWork;
+  do {
+    const current = completedWork.alternate;
+    const returnFiber = completedWork.return;
+    completeWork(current, completedWork);
+    const siblingFiber = completedWork.sibling;
+    if (siblingFiber !== null) {
+      workInProgress = siblingFiber;
+      return;
+    }
+    completedWork = returnFiber;
+    workInProgress = completedWork;
+  } while (completedWork !== null);
 }

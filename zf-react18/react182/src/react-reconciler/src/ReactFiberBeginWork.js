@@ -2,7 +2,7 @@ import { HostRoot, HostComponent, HostText } from "./ReactWorkTags";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-import logger, { indent } from "shared/logger";
+import logger from "shared/logger";
 
 function reconcileChildren(current, workInProgress, nextChildren) {
   if (current === null) {
@@ -37,7 +37,7 @@ function updateHostComponent(current, workInProgress) {
 }
 
 export function beginWork(current, workInProgress) {
-  logger(" ".repeat(indent.number) + "beginWork", workInProgress);
+  logger("beginWork", workInProgress);
   switch (workInProgress.tag) {
     case HostRoot:
       return updateHostRoot(current, workInProgress);
