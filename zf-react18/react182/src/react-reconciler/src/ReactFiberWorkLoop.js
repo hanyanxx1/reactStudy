@@ -2,6 +2,7 @@ import { scheduleCallback } from "scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
+import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork";
 import {
   HostComponent,
   HostRoot,
@@ -35,7 +36,7 @@ function commitRoot(root) {
   const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
   const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
   if (subtreeHasEffects || rootHasEffect) {
-     console.log("commitRoot");
+     commitMutationEffectsOnFiber(finishedWork, root);
   }
   root.current = finishedWork;
 }
