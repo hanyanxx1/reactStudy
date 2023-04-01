@@ -1,4 +1,9 @@
-import { HostRoot, HostComponent, HostText } from "./ReactWorkTags";
+import {
+  HostRoot,
+  HostComponent,
+  HostText,
+  FunctionComponent,
+} from "./ReactWorkTags";
 import { MutationMask, Placement } from "./ReactFiberFlags";
 import {
   insertBefore,
@@ -37,12 +42,12 @@ function insertOrAppendPlacementNode(node, before, parent) {
       appendChild(parent, stateNode);
     }
   } else {
-    debugger;
     const { child } = node;
     if (child !== null) {
       insertOrAppendPlacementNode(child, before, parent);
       let { sibling } = child;
       while (sibling !== null) {
+        debugger;
         insertOrAppendPlacementNode(child, before, parent);
         sibling = sibling.sibling;
       }
@@ -112,6 +117,7 @@ function commitReconciliationEffects(finishedWork) {
 export function commitMutationEffectsOnFiber(finishedWork, root) {
   switch (finishedWork.tag) {
     case HostRoot:
+    case FunctionComponent:
     case HostComponent:
     case HostText: {
       recursivelyTraverseMutationEffects(root, finishedWork);

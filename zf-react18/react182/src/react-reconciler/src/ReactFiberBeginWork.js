@@ -1,8 +1,15 @@
-import { HostRoot, HostComponent, HostText } from "./ReactWorkTags";
+import {
+  HostRoot,
+  HostComponent,
+  HostText,
+  IndeterminateComponent,
+  FunctionComponent,
+} from "./ReactWorkTags";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger from "shared/logger";
+import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
 
 function reconcileChildren(current, workInProgress, nextChildren) {
   if (current === null) {
@@ -35,10 +42,23 @@ function updateHostComponent(current, workInProgress) {
   reconcileChildren(current, workInProgress, nextChildren);
   return workInProgress.child;
 }
-
+function mountIndeterminateComponent(_current, workInProgress, Component) {
+  const props = workInProgress.pendingProps;
+  const value = renderWithHooks(null, workInProgress, Component, props);
+  workInProgress.tag = FunctionComponent;
+  reconcileChildren(null, workInProgress, value);
+  return workInProgress.child;
+}
 export function beginWork(current, workInProgress) {
   logger("beginWork", workInProgress);
   switch (workInProgress.tag) {
+    case IndeterminateComponent: {
+      return mountIndeterminateComponent(
+        current,
+        workInProgress,
+        workInProgress.type
+      );
+    }
     case HostRoot:
       return updateHostRoot(current, workInProgress);
     case HostComponent:
