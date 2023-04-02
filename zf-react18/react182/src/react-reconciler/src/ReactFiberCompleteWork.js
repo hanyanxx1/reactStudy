@@ -3,10 +3,11 @@ import {
   createInstance,
   createTextInstance,
   finalizeInitialChildren,
+  prepareUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger from "shared/logger";
 import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
-import { NoFlags } from "./ReactFiberFlags";
+import { NoFlags, Update } from "./ReactFiberFlags";
 function bubbleProperties(completedWork) {
   let subtreeFlags = NoFlags;
   let child = completedWork.child;
@@ -46,16 +47,34 @@ function appendAllChildren(parent, workInProgress) {
     node = node.sibling;
   }
 }
+function markUpdate(workInProgress) {
+  workInProgress.flags |= Update;
+}
+function updateHostComponent(current, workInProgress, type, newProps) {
+  const oldProps = current.memoizedProps;
+  const instance = workInProgress.stateNode;
+  const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
+  debugger;
+  workInProgress.updateQueue = updatePayload;
+  if (updatePayload) {
+    markUpdate(workInProgress);
+  }
+}
 export function completeWork(current, workInProgress) {
   logger("completeWork", workInProgress);
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
     case HostComponent: {
       const { type } = workInProgress;
-      const instance = createInstance(type, newProps, workInProgress);
-      appendAllChildren(instance, workInProgress);
-      workInProgress.stateNode = instance;
-      finalizeInitialChildren(instance, type, newProps);
+      if (current !== null && workInProgress.stateNode != null) {
+        updateHostComponent(current, workInProgress, type, newProps);
+        console.log("updatePayload", workInProgress.updateQueue);
+      } else {
+        const instance = createInstance(type, newProps, workInProgress);
+        appendAllChildren(instance, workInProgress);
+        workInProgress.stateNode = instance;
+        finalizeInitialChildren(instance, type, newProps);
+      }
       bubbleProperties(workInProgress);
       break;
     }

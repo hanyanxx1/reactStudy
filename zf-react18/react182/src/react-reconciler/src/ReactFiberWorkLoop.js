@@ -16,6 +16,8 @@ import {
   ChildDeletion,
   MutationMask,
 } from "./ReactFiberFlags";
+import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
+
 let workInProgress = null;
 export function scheduleUpdateOnFiber(root) {
   ensureRootIsScheduled(root);
@@ -33,10 +35,11 @@ function performConcurrentWorkOnRoot(root) {
 }
 function commitRoot(root) {
   const { finishedWork } = root;
-  const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
+  const subtreeHasEffects =
+    (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
   const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
   if (subtreeHasEffects || rootHasEffect) {
-     commitMutationEffectsOnFiber(finishedWork, root);
+    commitMutationEffectsOnFiber(finishedWork, root);
   }
   root.current = finishedWork;
 }
@@ -108,6 +111,7 @@ function getFlags(flags) {
 }
 function prepareFreshStack(root) {
   workInProgress = createWorkInProgress(root.current, null);
+  finishQueueingConcurrentUpdates();
 }
 function renderRootSync(root) {
   prepareFreshStack(root);

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test</title>
+  </head>
+  <body>
+    <button id="dispach">dispach</button>
+  </body>
+  <script>
+    let React = {
+      useReducer: null,
+    };
+    let dispach;
+    let workInProgress = {
+      flags: 2,
+      type: "FunctionComponet",
+      tag: 0,
+      child: null,
+    };
+    (function () {
+      let currentlyRenderingFiber = null;
+
+      function dispatchReducerAction(fiber) {
+        console.log(fiber);
+      }
+
+      function mountReducer(reducer, initialArg) {
+        const dispatch = dispatchReducerAction.bind(
+          null,
+          currentlyRenderingFiber
+        );
+        return dispatch;
+      }
+
+      function mountIndeterminateComponent() {
+        debugger;
+        renderWithHooks(null, workInProgress, Component, {});
+        workInProgress.child = {
+          flags: 0,
+          type: "button",
+          tag: 5,
+          child: null,
+        };
+      }
+
+      function renderWithHooks(current, workInProgress, Component, props) {
+        currentlyRenderingFiber = workInProgress;
+        React.useReducer = mountReducer;
+        Component();
+        currentlyRenderingFiber = null;
+      }
+
+      function Component() {
+        dispach = mountReducer();
+      }
+
+      mountIndeterminateComponent();
+    })();
+
+    let temp = document.getElementById("dispach");
+    temp.onclick = function () {
+      dispach();
+    };
+  </script>
+</html>
