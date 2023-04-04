@@ -32,26 +32,34 @@ import { createRoot } from "react-dom/client";
 //   );
 // }
 
-const reducer = (state, action) => {
-  if (action.type === "add") return state + 1;
-  // if (action.type === "mul") return state * 2;
-  return state;
-};
+// const reducer = (state, action) => {
+//   if (action.type === "add") return state + 1;
+//   // if (action.type === "mul") return state * 2;
+//   return state;
+// };
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useReducer(reducer, 0);
+//   // const [number1, setNumber1] = React.useReducer(reducer, 2);
+//   return (
+//     <button
+//       onClick={() => {
+//         setNumber({ type: "add" });
+//         // setNumber({ type: "mul" });
+//         // setNumber1({ type: "add" });
+//         // setNumber1({ type: "mul" });
+//       }}
+//     >
+//       {/* {number + number1} */}
+//       {number}
+//     </button>
+//   );
+// }
+
 function FunctionComponent() {
-  const [number, setNumber] = React.useReducer(reducer, 0);
-  // const [number1, setNumber1] = React.useReducer(reducer, 2);
+  console.log("FunctionComponent render");
+  const [number, setNumber] = React.useState(10);
   return (
-    <button
-      onClick={() => {
-        setNumber({ type: "add" });
-        // setNumber({ type: "mul" });
-        // setNumber1({ type: "add" });
-        // setNumber1({ type: "mul" });
-      }}
-    >
-      {/* {number + number1} */}
-      {number}
-    </button>
+    <button onClick={() => setNumber((number) => number + 1)}>{number}</button>
   );
 }
 
