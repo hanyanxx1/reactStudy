@@ -37,6 +37,7 @@ function appendAllChildren(parent, workInProgress) {
       continue;
     }
     if (node === workInProgress) {
+      debugger;
       return;
     }
     // 如果没有弟弟就找父亲的弟弟

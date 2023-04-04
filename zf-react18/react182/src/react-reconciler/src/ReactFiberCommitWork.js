@@ -84,6 +84,7 @@ function getHostSibling(fiber) {
     // 检查此原生节点是否稳定可以放置
     if (!(node.flags & Placement)) {
       // 找到它了!
+      debugger;
       return node.stateNode;
     }
   }
