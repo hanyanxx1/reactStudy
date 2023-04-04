@@ -49,7 +49,8 @@ export function finishQueueingConcurrentUpdates(fiber, queue, update) {
       if (pending === null) {
         update.next = update;
       } else {
-        debugger;
+        update.next = pending.next;
+        pending.next = update;
       }
       queue.pending = update;
     }

@@ -54,7 +54,6 @@ function updateHostComponent(current, workInProgress, type, newProps) {
   const oldProps = current.memoizedProps;
   const instance = workInProgress.stateNode;
   const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
-  debugger;
   workInProgress.updateQueue = updatePayload;
   if (updatePayload) {
     markUpdate(workInProgress);
