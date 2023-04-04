@@ -6,7 +6,12 @@ import {
   prepareUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger from "shared/logger";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import {
+  HostComponent,
+  HostRoot,
+  HostText,
+  FunctionComponent,
+} from "./ReactWorkTags";
 import { NoFlags, Update } from "./ReactFiberFlags";
 function bubbleProperties(completedWork) {
   let subtreeFlags = NoFlags;
@@ -77,6 +82,9 @@ export function completeWork(current, workInProgress) {
       bubbleProperties(workInProgress);
       break;
     }
+    case FunctionComponent:
+      bubbleProperties(workInProgress);
+      break;
     case HostRoot:
       bubbleProperties(workInProgress);
       break;

@@ -11,11 +11,15 @@ import getListener from "./getListener";
 import { HostComponent } from "react-reconciler/src/ReactWorkTags";
 
 SimpleEventPlugin.registerEvents();
+const listeningMarker = "_reactListening" + Math.random().toString(36).slice(2);
 export function listenToAllSupportedEvents(rootContainerElement) {
-  allNativeEvents.forEach((domEventName) => {
-    listenToNativeEvent(domEventName, true, rootContainerElement);
-    listenToNativeEvent(domEventName, false, rootContainerElement);
-  });
+  if (!rootContainerElement[listeningMarker]) {
+    rootContainerElement[listeningMarker] = true;
+    allNativeEvents.forEach((domEventName) => {
+      listenToNativeEvent(domEventName, true, rootContainerElement);
+      listenToNativeEvent(domEventName, false, rootContainerElement);
+    });
+  }
 }
 
 export function listenToNativeEvent(
