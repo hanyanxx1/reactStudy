@@ -76,16 +76,29 @@ import { createRoot } from "react-dom/client";
 //   );
 // }
 
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
+//   return number === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title1" id="title">
+//       title
+//     </div>
+//   ) : (
+//     <div onClick={() => setNumber(number + 1)} key="title2" id="title2">
+//       title2
+//     </div>
+//   );
+// }
+
 function FunctionComponent() {
   const [number, setNumber] = React.useState(0);
   return number === 0 ? (
-    <div onClick={() => setNumber(number + 1)} key="title1" id="title">
-      title
+    <div onClick={() => setNumber(number + 1)} key="title1" id="title1">
+      title1
     </div>
   ) : (
-    <div onClick={() => setNumber(number + 1)} key="title2" id="title2">
-      title2
-    </div>
+    <p onClick={() => setNumber(number + 1)} key="title1" id="title1">
+      title1
+    </p>
   );
 }
 
