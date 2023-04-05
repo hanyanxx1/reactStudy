@@ -21,40 +21,7 @@ function mountWorkInProgressHook() {
   }
   return workInProgressHook;
 }
-function dispatchReducerAction(fiber, queue, action) {
-  const update = {
-    action,
-    next: null,
-  };
-  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
-  scheduleUpdateOnFiber(root, fiber);
-}
-const HooksDispatcherOnMountInDEV = {
-  useReducer: mountReducer,
-  useState: mountState,
-};
-function basicStateReducer(state, action) {
-  return typeof action === "function" ? action(state) : action;
-}
-function mountReducer(reducer, initialArg) {
-  const hook = mountWorkInProgressHook();
-  hook.memoizedState = initialArg;
-  const queue = {
-    pending: null,
-    dispatch: null,
-  };
-  hook.queue = queue;
-  const dispatch = (queue.dispatch = dispatchReducerAction.bind(
-    null,
-    currentlyRenderingFiber,
-    queue
-  ));
-  return [hook.memoizedState, dispatch];
-}
-const HooksDispatcherOnUpdateInDEV = {
-  useReducer: updateReducer,
-  useState: updateState,
-};
+
 function updateWorkInProgressHook() {
   if (currentHook === null) {
     const current = currentlyRenderingFiber.alternate;
@@ -74,6 +41,33 @@ function updateWorkInProgressHook() {
   }
   return workInProgressHook;
 }
+
+const HooksDispatcherOnMountInDEV = {
+  useReducer: mountReducer,
+  useState: mountState,
+};
+
+const HooksDispatcherOnUpdateInDEV = {
+  useReducer: updateReducer,
+  useState: updateState,
+};
+
+function mountReducer(reducer, initialArg) {
+  const hook = mountWorkInProgressHook();
+  hook.memoizedState = initialArg;
+  const queue = {
+    pending: null,
+    dispatch: null,
+  };
+  hook.queue = queue;
+  const dispatch = (queue.dispatch = dispatchReducerAction.bind(
+    null,
+    currentlyRenderingFiber,
+    queue
+  ));
+  return [hook.memoizedState, dispatch];
+}
+
 function updateReducer(reducer) {
   const hook = updateWorkInProgressHook();
   const queue = hook.queue;
@@ -98,6 +92,20 @@ function updateReducer(reducer) {
   hook.memoizedState = queue.lastRenderedState = newState;
   return [hook.memoizedState, queue.dispatch];
 }
+
+function dispatchReducerAction(fiber, queue, action) {
+  const update = {
+    action,
+    next: null,
+  };
+  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
+  scheduleUpdateOnFiber(root, fiber);
+}
+
+function basicStateReducer(state, action) {
+  return typeof action === "function" ? action(state) : action;
+}
+
 function mountState(initialState) {
   const hook = mountWorkInProgressHook();
   hook.memoizedState = hook.baseState = initialState;
@@ -115,6 +123,11 @@ function mountState(initialState) {
   ));
   return [hook.memoizedState, dispatch];
 }
+
+function updateState(initialState) {
+  return updateReducer(basicStateReducer, initialState);
+}
+
 function dispatchSetState(fiber, queue, action) {
   const update = {
     action,
@@ -133,9 +146,7 @@ function dispatchSetState(fiber, queue, action) {
   const root = enqueueConcurrentHookUpdate(fiber, queue, update);
   scheduleUpdateOnFiber(root, fiber);
 }
-function updateState(initialState) {
-  return updateReducer(basicStateReducer, initialState);
-}
+
 export function renderWithHooks(current, workInProgress, Component, props) {
   currentlyRenderingFiber = workInProgress;
   if (current !== null && current.memoizedState !== null) {
