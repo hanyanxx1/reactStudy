@@ -156,7 +156,6 @@ function commitPlacement(finishedWork) {
   const parentFiber = getHostParentFiber(finishedWork);
   switch (parentFiber.tag) {
     case HostComponent: {
-      debugger;
       const parent = parentFiber.stateNode;
       const before = getHostSibling(finishedWork);
       insertOrAppendPlacementNode(finishedWork, before, parent);
