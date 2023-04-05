@@ -63,6 +63,7 @@ import { createRoot } from "react-dom/client";
 //   );
 // }
 
+//24.单节点(key 相同,类型相同)
 // function FunctionComponent() {
 //   const [number, setNumber] = React.useState(0);
 //   return number === 0 ? (
@@ -76,6 +77,7 @@ import { createRoot } from "react-dom/client";
 //   );
 // }
 
+//25.单节点 key 不同,类型相同
 // function FunctionComponent() {
 //   const [number, setNumber] = React.useState(0);
 //   return number === 0 ? (
@@ -89,16 +91,37 @@ import { createRoot } from "react-dom/client";
 //   );
 // }
 
+//26.单节点 key 相同,类型不同
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
+//   return number === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title1" id="title1">
+//       title1
+//     </div>
+//   ) : (
+//     <p onClick={() => setNumber(number + 1)} key="title1" id="title1">
+//       title1
+//     </p>
+//   );
+// }
+
+//27.原来多个节点，现在只有一个节点
 function FunctionComponent() {
   const [number, setNumber] = React.useState(0);
   return number === 0 ? (
-    <div onClick={() => setNumber(number + 1)} key="title1" id="title1">
-      title1
-    </div>
+    <ul key="container" onClick={() => setNumber(number + 1)}>
+      <li key="A">A</li>
+      <li key="B" id="B">
+        B
+      </li>
+      <li key="C">C</li>
+    </ul>
   ) : (
-    <p onClick={() => setNumber(number + 1)} key="title1" id="title1">
-      title1
-    </p>
+    <ul key="container" onClick={() => setNumber(number + 1)}>
+      <li key="B" id="B2">
+        B2
+      </li>
+    </ul>
   );
 }
 

@@ -17,7 +17,6 @@ function commitDeletionEffects(root, returnFiber, deletedFiber) {
   findParent: while (parent !== null) {
     switch (parent.tag) {
       case HostComponent: {
-        debugger;
         hostParent = parent.stateNode;
         break findParent;
       }
