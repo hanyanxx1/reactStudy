@@ -129,10 +129,10 @@ function getHostSibling(fiber) {
       }
       node = node.return;
     }
-    debugger;
     // node.sibling.return = node.return
     node = node.sibling;
     while (node.tag !== HostComponent && node.tag !== HostText) {
+      debugger;
       // 如果它不是原生节点，并且，我们可能在其中有一个原生节点
       // 试着向下搜索，直到找到为止
       if (node.flags & Placement) {
@@ -147,7 +147,6 @@ function getHostSibling(fiber) {
     // 检查此原生节点是否稳定可以放置
     if (!(node.flags & Placement)) {
       // 找到它了!
-      debugger;
       return node.stateNode;
     }
   }
