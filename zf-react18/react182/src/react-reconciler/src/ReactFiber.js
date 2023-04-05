@@ -23,6 +23,7 @@ export function FiberNode(tag, pendingProps, key) {
 
   this.flags = NoFlags;
   this.subtreeFlags = NoFlags;
+  this.deletions = null;
   this.alternate = null;
 }
 

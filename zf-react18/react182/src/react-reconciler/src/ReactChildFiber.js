@@ -6,7 +6,7 @@ import {
   createFiberFromText,
   createWorkInProgress,
 } from "./ReactFiber";
-import { Placement } from "./ReactFiberFlags";
+import { Placement, ChildDeletion } from "./ReactFiberFlags";
 import { HostText } from "./ReactWorkTags";
 
 function createChildReconciler(shouldTrackSideEffects) {
@@ -15,6 +15,18 @@ function createChildReconciler(shouldTrackSideEffects) {
     clone.index = 0;
     clone.sibling = null;
     return clone;
+  }
+  function deleteChild(returnFiber, childToDelete) {
+    if (!shouldTrackSideEffects) {
+      return;
+    }
+    const deletions = returnFiber.deletions;
+    if (deletions === null) {
+      returnFiber.deletions = [childToDelete];
+      returnFiber.flags |= ChildDeletion;
+    } else {
+      deletions.push(childToDelete);
+    }
   }
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
     const key = element.key;
@@ -27,9 +39,10 @@ function createChildReconciler(shouldTrackSideEffects) {
           existing.return = returnFiber;
           return existing;
         }
-        debugger;
-        child = child.sibling;
+      } else {
+        deleteChild(returnFiber, child);
       }
+      child = child.sibling;
     }
     const created = createFiberFromElement(element);
     created.return = returnFiber;
