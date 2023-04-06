@@ -1,4 +1,7 @@
-import { scheduleCallback } from "scheduler";
+import {
+  NormalPriority as NormalSchedulerPriority,
+  scheduleCallback as Scheduler_scheduleCallback,
+} from "./Scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
@@ -6,7 +9,7 @@ import {
   commitMutationEffects,
   commitPassiveUnmountEffects,
   commitPassiveMountEffects,
-  commitLayoutEffects
+  commitLayoutEffects,
 } from "./ReactFiberCommitWork";
 import {
   HostComponent,
@@ -32,7 +35,10 @@ export function scheduleUpdateOnFiber(root) {
   ensureRootIsScheduled(root);
 }
 function ensureRootIsScheduled(root) {
-  scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
+  Scheduler_scheduleCallback(
+    NormalSchedulerPriority,
+    performConcurrentWorkOnRoot.bind(null, root)
+  );
 }
 function performConcurrentWorkOnRoot(root) {
   renderRootSync(root);
@@ -57,7 +63,7 @@ function commitRoot(root) {
   ) {
     if (!rootDoesHavePassiveEffects) {
       rootDoesHavePassiveEffects = true;
-      scheduleCallback(flushPassiveEffects);
+      Scheduler_scheduleCallback(flushPassiveEffects);
     }
   }
   const subtreeHasEffects =
