@@ -6,6 +6,7 @@ import {
   commitMutationEffects,
   commitPassiveUnmountEffects,
   commitPassiveMountEffects,
+  commitLayoutEffects
 } from "./ReactFiberCommitWork";
 import {
   HostComponent,
@@ -64,6 +65,7 @@ function commitRoot(root) {
   const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
   if (subtreeHasEffects || rootHasEffect) {
     commitMutationEffects(finishedWork, root);
+    commitLayoutEffects(finishedWork, root);
     root.current = finishedWork;
     if (rootDoesHavePassiveEffects) {
       rootDoesHavePassiveEffects = false;

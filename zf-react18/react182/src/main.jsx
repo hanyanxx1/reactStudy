@@ -229,6 +229,38 @@ import { createRoot } from "react-dom/client";
 
 // let element = <FunctionComponent />;
 
+//33.useEffect
+// function Counter() {
+//   const [number, setNumber] = React.useState(0);
+//   React.useEffect(() => {
+//     console.log("useEffect1");
+//     return () => {
+//       console.log("destroy useEffect1");
+//     };
+//   });
+//   React.useEffect(() => {
+//     console.log("useEffect2");
+//     return () => {
+//       console.log("destroy useEffect2");
+//     };
+//   });
+//   React.useEffect(() => {
+//     console.log("useEffect3");
+//     return () => {
+//       console.log("destroy useEffect3");
+//     };
+//   });
+//   return (
+//     <div
+//       onClick={() => {
+//         setNumber(number + 1);
+//       }}
+//     >
+//       {number}
+//     </div>
+//   );
+// }
+
 function Counter() {
   const [number, setNumber] = React.useState(0);
   React.useEffect(() => {
@@ -237,10 +269,10 @@ function Counter() {
       console.log("destroy useEffect1");
     };
   });
-  React.useEffect(() => {
-    console.log("useEffect2");
+  React.useLayoutEffect(() => {
+    console.log("useLayoutEffect2");
     return () => {
-      console.log("destroy useEffect2");
+      console.log("destroy useLayoutEffect2");
     };
   });
   React.useEffect(() => {

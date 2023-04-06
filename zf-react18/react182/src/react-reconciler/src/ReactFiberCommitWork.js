@@ -4,7 +4,13 @@ import {
   HostText,
   FunctionComponent,
 } from "./ReactWorkTags";
-import { MutationMask, Placement, Update, Passive } from "./ReactFiberFlags";
+import {
+  Passive,
+  MutationMask,
+  Placement,
+  Update,
+  LayoutMask,
+} from "./ReactFiberFlags";
 import {
   insertBefore,
   appendChild,
@@ -14,6 +20,7 @@ import {
 import {
   HasEffect as HookHasEffect,
   Passive as HookPassive,
+  Layout as HookLayout,
 } from "./ReactHookEffectTags";
 
 export function commitMutationEffects(finishedWork, root) {
@@ -312,6 +319,13 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
     case FunctionComponent: {
       recursivelyTraverseMutationEffects(root, finishedWork);
       commitReconciliationEffects(finishedWork);
+      if (flags & Update) {
+        commitHookEffectListUnmount(
+          HookLayout | HookHasEffect,
+          finishedWork,
+          finishedWork.return
+        );
+      }
       break;
     }
     case HostComponent: {
@@ -348,4 +362,40 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
       break;
     }
   }
+}
+
+export function commitLayoutEffects(finishedWork, root) {
+  const current = finishedWork.alternate;
+  commitLayoutEffectOnFiber(root, current, finishedWork);
+}
+
+function commitLayoutEffectOnFiber(finishedRoot, current, finishedWork) {
+  const flags = finishedWork.flags;
+  switch (finishedWork.tag) {
+    case FunctionComponent: {
+      recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+      if (flags & Update) {
+        commitHookLayoutEffects(finishedWork, HookLayout | HookHasEffect);
+      }
+    }
+    case HostRoot: {
+      recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+      break;
+    }
+  }
+}
+
+function recursivelyTraverseLayoutEffects(root, parentFiber) {
+  if (parentFiber.subtreeFlags & LayoutMask) {
+    let child = parentFiber.child;
+    while (child !== null) {
+      const current = child.alternate;
+      commitLayoutEffectOnFiber(root, current, child);
+      child = child.sibling;
+    }
+  }
+}
+
+function commitHookLayoutEffects(finishedWork, hookFlags) {
+  commitHookEffectListMount(hookFlags, finishedWork);
 }
