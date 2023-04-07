@@ -296,7 +296,23 @@ import { createRoot } from "react-dom/client";
 // let element = <Counter />;
 
 //36.初次渲染
-let element = <h1>hello</h1>;
+// let element = <h1>hello</h1>;
+
+//37.更新渲染
+function FunctionComponent() {
+  const [number, setNumber] = React.useState(0);
+  return (
+    <button
+      onClick={() => {
+        setNumber(number + 1);
+      }}
+    >
+      {number}
+    </button>
+  );
+}
+
+const element = <FunctionComponent />;
 
 const root = createRoot(document.getElementById("root"));
 root.render(element);

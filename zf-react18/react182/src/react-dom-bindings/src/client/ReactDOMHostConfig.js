@@ -60,6 +60,5 @@ export function getCurrentEventPriority() {
   if (currentEvent === undefined) {
     return DefaultEventPriority;
   }
-  debugger;
   return getEventPriority(currentEvent.type);
 }

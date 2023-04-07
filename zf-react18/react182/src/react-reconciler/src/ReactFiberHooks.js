@@ -1,6 +1,6 @@
 import ReactSharedInternals from "shared/ReactSharedInternals";
 import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
-import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
+import { scheduleUpdateOnFiber, requestUpdateLane } from "./ReactFiberWorkLoop";
 import is from "shared/objectIs";
 import {
   Passive as PassiveEffect,
@@ -241,7 +241,9 @@ function updateState(initialState) {
 }
 
 function dispatchSetState(fiber, queue, action) {
+  const lane = requestUpdateLane(fiber);
   const update = {
+    lane,
     action,
     hasEagerState: false,
     eagerState: null,
@@ -255,8 +257,8 @@ function dispatchSetState(fiber, queue, action) {
   if (is(eagerState, currentState)) {
     return;
   }
-  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
-  scheduleUpdateOnFiber(root, fiber);
+  const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
+  scheduleUpdateOnFiber(root, fiber, lane);
 }
 
 export function renderWithHooks(current, workInProgress, Component, props) {

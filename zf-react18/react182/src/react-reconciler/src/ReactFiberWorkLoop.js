@@ -45,8 +45,13 @@ import {
   ContinuousEventPriority,
   DefaultEventPriority,
   IdleEventPriority,
+  setCurrentUpdatePriority,
 } from "./ReactEventPriorities";
 import { getCurrentEventPriority } from "react-dom-bindings/src/client/ReactDOMHostConfig";
+import {
+  scheduleSyncCallback,
+  flushSyncCallbacks,
+} from "./ReactFiberSyncTaskQueue";
 
 let workInProgress = null;
 let rootDoesHavePassiveEffects = false;
@@ -62,8 +67,8 @@ function ensureRootIsScheduled(root) {
   const nextLanes = getNextLanes(root, NoLanes);
   const newCallbackPriority = getHighestPriorityLane(nextLanes);
   if (newCallbackPriority === SyncLane) {
-    // TODO
-    debugger;
+    scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
+    queueMicrotask(flushSyncCallbacks);
   } else {
     let schedulerPriorityLevel;
     switch (lanesToEventPriority(nextLanes)) {
@@ -92,6 +97,15 @@ function ensureRootIsScheduled(root) {
       performConcurrentWorkOnRoot.bind(null, root)
     );
   }
+}
+
+function performSyncWorkOnRoot(root) {
+  const lanes = getNextLanes(root, NoLanes);
+  renderRootSync(root, lanes);
+  const finishedWork = root.current.alternate;
+  root.finishedWork = finishedWork;
+  commitRoot(root);
+  return null;//如果没有任务了一定要返回null
 }
 
 function performConcurrentWorkOnRoot(root, didTimeout) {
@@ -126,6 +140,16 @@ export function flushPassiveEffects() {
 }
 
 function commitRoot(root) {
+  const previousPriority = getCurrentUpdatePriority();
+  try {
+    setCurrentUpdatePriority(DiscreteEventPriority);
+    commitRootImpl(root);
+  } finally {
+    setCurrentUpdatePriority(previousPriority);
+  }
+}
+
+function commitRootImpl(root) {
   const { finishedWork } = root;
   if (
     (finishedWork.subtreeFlags & Passive) !== NoFlags ||
@@ -266,7 +290,6 @@ function completeUnitOfWork(unitOfWork) {
 export function requestUpdateLane() {
   const updateLane = getCurrentUpdatePriority();
   if (updateLane !== NoLane) {
-    debugger;
     return updateLane;
   }
   const eventLane = getCurrentEventPriority();

@@ -5,6 +5,8 @@ import {
   DiscreteEventPriority,
   ContinuousEventPriority,
   DefaultEventPriority,
+  getCurrentUpdatePriority,
+  setCurrentUpdatePriority,
 } from "react-reconciler/src/ReactEventPriorities";
 
 export function createEventListenerWrapperWithPriority(
@@ -27,7 +29,13 @@ function dispatchDiscreteEvent(
   container,
   nativeEvent
 ) {
-  dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent);
+  const previousPriority = getCurrentUpdatePriority();
+  try {
+    setCurrentUpdatePriority(DiscreteEventPriority);
+    dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent);
+  } finally {
+    setCurrentUpdatePriority(previousPriority);
+  }
 }
 
 export function dispatchEvent(
@@ -48,7 +56,6 @@ export function dispatchEvent(
 }
 
 export function getEventPriority(domEventName) {
-  debugger;
   switch (domEventName) {
     case "click":
       return DiscreteEventPriority;
