@@ -4,6 +4,9 @@ import {
   updateProperties,
 } from "./ReactDOMComponent";
 import { precacheFiberNode, updateFiberProps } from "./ReactDOMComponentTree";
+import { getEventPriority } from "../events/ReactDOMEventListener";
+import { DefaultEventPriority } from "react-reconciler/src/ReactEventPriorities";
+
 export function shouldSetTextContent(type, props) {
   return (
     typeof props.children === "string" || typeof props.children === "number"
@@ -50,4 +53,13 @@ export function commitUpdate(
 
 export function removeChild(parentInstance, child) {
   parentInstance.removeChild(child);
+}
+
+export function getCurrentEventPriority() {
+  const currentEvent = window.event;
+  if (currentEvent === undefined) {
+    return DefaultEventPriority;
+  }
+  debugger;
+  return getEventPriority(currentEvent.type);
 }

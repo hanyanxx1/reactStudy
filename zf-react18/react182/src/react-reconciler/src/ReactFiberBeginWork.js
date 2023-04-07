@@ -5,7 +5,10 @@ import {
   IndeterminateComponent,
   FunctionComponent,
 } from "./ReactWorkTags";
-import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
+import {
+  processUpdateQueue,
+  cloneUpdateQueue,
+} from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger from "shared/logger";
@@ -23,8 +26,10 @@ function reconcileChildren(current, workInProgress, nextChildren) {
   }
 }
 
-function updateHostRoot(current, workInProgress) {
-  processUpdateQueue(workInProgress);
+function updateHostRoot(current, workInProgress, renderLanes) {
+  const nextProps = workInProgress.pendingProps;
+  cloneUpdateQueue(current, workInProgress);
+  processUpdateQueue(workInProgress, nextProps, renderLanes);
   const nextState = workInProgress.memoizedState;
   const nextChildren = nextState.element;
   reconcileChildren(current, workInProgress, nextChildren);
@@ -55,18 +60,24 @@ function updateFunctionComponent(
   Component,
   nextProps
 ) {
-  const nextChildren = renderWithHooks(current, workInProgress, Component, nextProps);
+  const nextChildren = renderWithHooks(
+    current,
+    workInProgress,
+    Component,
+    nextProps
+  );
   reconcileChildren(current, workInProgress, nextChildren);
   return workInProgress.child;
 }
-export function beginWork(current, workInProgress) {
+export function beginWork(current, workInProgress, renderLanes) {
   logger("beginWork", workInProgress);
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
       return mountIndeterminateComponent(
         current,
         workInProgress,
-        workInProgress.type
+        workInProgress.type,
+        renderLanes
       );
     }
     case FunctionComponent: {
@@ -76,13 +87,14 @@ export function beginWork(current, workInProgress) {
         current,
         workInProgress,
         Component,
-        resolvedProps
+        resolvedProps,
+        renderLanes
       );
     }
     case HostRoot:
-      return updateHostRoot(current, workInProgress);
+      return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
-      return updateHostComponent(current, workInProgress);
+      return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
     default:
       return null;
