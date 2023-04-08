@@ -1,4 +1,5 @@
 import { HostRoot } from "./ReactWorkTags";
+import { mergeLanes, NoLanes } from './ReactFiberLane';
 
 const concurrentQueues = [];
 let concurrentQueuesIndex = 0;
@@ -32,6 +33,7 @@ function enqueueUpdate(fiber, queue, update, lane) {
   concurrentQueues[concurrentQueuesIndex++] = queue;
   concurrentQueues[concurrentQueuesIndex++] = update;
   concurrentQueues[concurrentQueuesIndex++] = lane;
+  fiber.lanes = mergeLanes(fiber.lanes, lane);
 }
 
 function getRootForUpdatedFiber(sourceFiber) {

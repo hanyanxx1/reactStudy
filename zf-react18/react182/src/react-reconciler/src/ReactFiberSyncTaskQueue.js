@@ -11,7 +11,6 @@ export function scheduleSyncCallback(callback) {
   if (syncQueue === null) {
     syncQueue = [callback];
   } else {
-    debugger;
     syncQueue.push(callback);
   }
 }

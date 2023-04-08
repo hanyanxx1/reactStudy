@@ -5,6 +5,7 @@ import {
   HostText,
 } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
+import { NoLanes } from "./ReactFiberLane";
 
 export function FiberNode(tag, pendingProps, key) {
   this.tag = tag;
@@ -28,6 +29,8 @@ export function FiberNode(tag, pendingProps, key) {
 
   this.index = 0;
   this.ref = null;
+  this.lanes = NoLanes;
+  this.childLanes = NoLanes;
 }
 
 function createFiber(tag, pendingProps, key) {
@@ -58,6 +61,7 @@ export function createWorkInProgress(current, pendingProps) {
     workInProgress.type = current.type;
     workInProgress.flags = NoFlags;
     workInProgress.subtreeFlags = NoFlags;
+    workInProgress.deletions = null;
   }
   workInProgress.child = current.child;
   workInProgress.memoizedProps = current.memoizedProps;
@@ -66,6 +70,9 @@ export function createWorkInProgress(current, pendingProps) {
   workInProgress.sibling = current.sibling;
   workInProgress.index = current.index;
   workInProgress.ref = current.ref;
+  workInProgress.flags = current.flags;
+  workInProgress.childLanes = current.childLanes;
+  workInProgress.lanes = current.lanes;
   return workInProgress;
 }
 

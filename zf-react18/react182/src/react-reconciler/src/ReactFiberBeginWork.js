@@ -13,6 +13,7 @@ import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger from "shared/logger";
 import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
+import { NoLanes } from "./ReactFiberLane";
 
 function reconcileChildren(current, workInProgress, nextChildren) {
   if (current === null) {
@@ -54,23 +55,27 @@ function mountIndeterminateComponent(_current, workInProgress, Component) {
   reconcileChildren(null, workInProgress, value);
   return workInProgress.child;
 }
+
 function updateFunctionComponent(
   current,
   workInProgress,
   Component,
-  nextProps
+  nextProps,
+  renderLanes
 ) {
   const nextChildren = renderWithHooks(
     current,
     workInProgress,
     Component,
-    nextProps
+    nextProps,
+    renderLanes
   );
   reconcileChildren(current, workInProgress, nextChildren);
   return workInProgress.child;
 }
 export function beginWork(current, workInProgress, renderLanes) {
-  logger("beginWork", workInProgress);
+  // logger("beginWork", workInProgress);
+  workInProgress.lanes = NoLanes;
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
       return mountIndeterminateComponent(

@@ -1,6 +1,10 @@
 import ReactSharedInternals from "shared/ReactSharedInternals";
 import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
-import { scheduleUpdateOnFiber, requestUpdateLane } from "./ReactFiberWorkLoop";
+import {
+  scheduleUpdateOnFiber,
+  requestUpdateLane,
+  requestEventTime,
+} from "./ReactFiberWorkLoop";
 import is from "shared/objectIs";
 import {
   Passive as PassiveEffect,
@@ -11,18 +15,21 @@ import {
   Passive as HookPassive,
   Layout as HookLayout,
 } from "./ReactHookEffectTags";
-import { NoLanes } from "./ReactFiberLane";
+import { NoLanes, NoLane, mergeLanes, isSubsetOfLanes } from "./ReactFiberLane";
 
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
 let workInProgressHook = null;
 let currentHook = null;
+let renderLanes = NoLanes;
 
 function mountWorkInProgressHook() {
   const hook = {
     memoizedState: null,
     queue: null,
     next: null,
+    baseState: null,
+    baseQueue: null,
   };
   if (workInProgressHook === null) {
     currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
@@ -43,6 +50,8 @@ function updateWorkInProgressHook() {
     memoizedState: currentHook.memoizedState,
     queue: currentHook.queue,
     next: null,
+    baseState: currentHook.baseState,
+    baseQueue: currentHook.baseQueue,
   };
   if (workInProgressHook === null) {
     currentlyRenderingFiber.memoizedState = workInProgressHook = newHook;
@@ -65,7 +74,7 @@ const HooksDispatcherOnUpdateInDEV = {
   useState: updateState,
   useEffect: updateEffect,
   useLayoutEffect: updateLayoutEffect,
-  useRef: updateRef
+  useRef: updateRef,
 };
 
 function mountRef(initialValue) {
@@ -187,6 +196,8 @@ function mountReducer(reducer, initialArg) {
   const queue = {
     pending: null,
     dispatch: null,
+    lastRenderedReducer: reducer,
+    lastRenderedState: initialArg,
   };
   hook.queue = queue;
   const dispatch = (queue.dispatch = dispatchReducerAction.bind(
@@ -202,24 +213,82 @@ function updateReducer(reducer) {
   const queue = hook.queue;
   queue.lastRenderedReducer = reducer;
   const current = currentHook;
+  let baseQueue = current.baseQueue;
   const pendingQueue = queue.pending;
-  let newState = current.memoizedState;
   if (pendingQueue !== null) {
+    if (baseQueue !== null) {
+      const baseFirst = baseQueue.next;
+      const pendingFirst = pendingQueue.next;
+      baseQueue.next = pendingFirst;
+      pendingQueue.next = baseFirst;
+    }
+    current.baseQueue = baseQueue = pendingQueue;
     queue.pending = null;
-    const first = pendingQueue.next;
+  }
+  if (baseQueue !== null) {
+    printQueue(baseQueue);
+    const first = baseQueue.next;
+    let newState = current.baseState;
+    let newBaseState = null;
+    let newBaseQueueFirst = null;
+    let newBaseQueueLast = null;
     let update = first;
     do {
-      if (update.hasEagerState) {
-        newState = update.eagerState;
+      const updateLane = update.lane;
+      const shouldSkipUpdate = !isSubsetOfLanes(renderLanes, updateLane);
+      if (shouldSkipUpdate) {
+        const clone = {
+          lane: updateLane,
+          action: update.action,
+          hasEagerState: update.hasEagerState,
+          eagerState: update.eagerState,
+          next: null,
+        };
+        if (newBaseQueueLast === null) {
+          newBaseQueueFirst = newBaseQueueLast = clone;
+          newBaseState = newState;
+        } else {
+          newBaseQueueLast = newBaseQueueLast.next = clone;
+        }
+        currentlyRenderingFiber.lanes = mergeLanes(
+          currentlyRenderingFiber.lanes,
+          updateLane
+        );
       } else {
-        const action = update.action;
-        newState = reducer(newState, action);
+        if (newBaseQueueLast !== null) {
+          const clone = {
+            lane: NoLane,
+            action: update.action,
+            hasEagerState: update.hasEagerState,
+            eagerState: update.eagerState,
+            next: null,
+          };
+          newBaseQueueLast = newBaseQueueLast.next = clone;
+        }
+        if (update.hasEagerState) {
+          newState = update.eagerState;
+        } else {
+          const action = update.action;
+          newState = reducer(newState, action);
+        }
       }
       update = update.next;
     } while (update !== null && update !== first);
+    if (newBaseQueueLast === null) {
+      newBaseState = newState;
+    } else {
+      newBaseQueueLast.next = newBaseQueueFirst;
+    }
+    hook.memoizedState = newState;
+    hook.baseState = newBaseState;
+    hook.baseQueue = newBaseQueueLast;
+    queue.lastRenderedState = newState;
   }
-  hook.memoizedState = queue.lastRenderedState = newState;
-  return [hook.memoizedState, queue.dispatch];
+  if (baseQueue === null) {
+    queue.lanes = NoLanes;
+  }
+  const dispatch = queue.dispatch;
+  return [hook.memoizedState, dispatch];
 }
 
 function dispatchReducerAction(fiber, queue, action) {
@@ -228,7 +297,8 @@ function dispatchReducerAction(fiber, queue, action) {
     next: null,
   };
   const root = enqueueConcurrentHookUpdate(fiber, queue, update);
-  scheduleUpdateOnFiber(root, fiber);
+  const eventTime = requestEventTime();
+  scheduleUpdateOnFiber(root, fiber, lane, eventTime);
 }
 
 function basicStateReducer(state, action) {
@@ -271,7 +341,6 @@ function dispatchSetState(fiber, queue, action) {
     fiber.lanes === NoLanes &&
     (alternate === null || alternate.lanes === NoLanes)
   ) {
-    debugger;
     const lastRenderedReducer = queue.lastRenderedReducer;
     const currentState = queue.lastRenderedState;
     const eagerState = lastRenderedReducer(currentState, action);
@@ -285,7 +354,8 @@ function dispatchSetState(fiber, queue, action) {
   scheduleUpdateOnFiber(root, fiber, lane);
 }
 
-export function renderWithHooks(current, workInProgress, Component, props) {
+export function renderWithHooks(current, workInProgress, Component, props, nextRenderLanes) {
+  renderLanes = nextRenderLanes;
   currentlyRenderingFiber = workInProgress;
   workInProgress.updateQueue = null;
   workInProgress.memoizedState = null;
@@ -298,5 +368,18 @@ export function renderWithHooks(current, workInProgress, Component, props) {
   currentlyRenderingFiber = null;
   workInProgressHook = null;
   currentHook = null;
+  renderLanes = NoLanes;
   return children;
+}
+
+function printQueue(queue) {
+  const first = queue.next;
+  let desc = "";
+  let update = first;
+  do {
+    desc += "=>" + update.action.id;
+    update = update.next;
+  } while (update !== null && update !== first);
+  desc += "=>null";
+  console.log(desc);
 }

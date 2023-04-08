@@ -142,4 +142,5 @@ export {
   unstable_scheduleCallback,
   unstable_cancelCallback,
   shouldYieldToHost as unstable_shouldYield,
+  getCurrentTime as unstable_now
 };

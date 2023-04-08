@@ -6,6 +6,7 @@ import {
   IdlePriority as IdleSchedulerPriority,
   shouldYield,
   cancelCallback as Scheduler_cancelCallback,
+  now,
 } from "./Scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
@@ -33,12 +34,17 @@ import {
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 import {
   NoLane,
+  markRootUpdated,
   NoLanes,
-  SyncLane,
   getNextLanes,
   getHighestPriorityLane,
-  markRootUpdated,
+  SyncLane,
   includesBlockingLane,
+  markStarvedLanesAsExpired,
+  includesExpiredLane,
+  mergeLanes,
+  markRootFinished,
+  NoTimestamp,
 } from "./ReactFiberLane";
 import {
   getCurrentUpdatePriority,
@@ -64,14 +70,21 @@ const RootInProgress = 0;
 const RootCompleted = 5;
 let workInProgressRoot = null;
 let workInProgressRootExitStatus = RootInProgress;
+let currentEventTime = NoTimestamp;
 
-export function scheduleUpdateOnFiber(root, fiber, lane) {
-  markRootUpdated(root, lane);
-  ensureRootIsScheduled(root);
+function cancelCallback(callbackNode) {
+  console.log("cancelCallback");
+  return Scheduler_cancelCallback(callbackNode);
 }
 
-function ensureRootIsScheduled(root) {
+export function scheduleUpdateOnFiber(root, fiber, lane, eventTime) {
+  markRootUpdated(root, lane);
+  ensureRootIsScheduled(root, eventTime);
+}
+
+function ensureRootIsScheduled(root, currentTime) {
   const existingCallbackNode = root.callbackNode;
+  markStarvedLanesAsExpired(root, currentTime);
   const nextLanes = getNextLanes(
     root,
     root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes
@@ -141,7 +154,11 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   if (lanes === NoLanes) {
     return null;
   }
-  const shouldTimeSlice = !includesBlockingLane(root, lanes) && !didTimeout;
+  const nonIncludesBlockingLane = !includesBlockingLane(root, lanes);
+  const nonIncludesExpiredLane = !includesExpiredLane(root, lanes);
+  const nonTimeout = !didTimeout;
+  const shouldTimeSlice =
+    nonIncludesBlockingLane && nonIncludesExpiredLane && nonTimeout;
   const exitStatus = shouldTimeSlice
     ? renderRootConcurrent(root, lanes)
     : renderRootSync(root, lanes);
@@ -163,6 +180,7 @@ function renderRootConcurrent(root, lanes) {
     prepareFreshStack(root, lanes);
   }
   workLoopConcurrent();
+  sleep(5);
   if (workInProgress !== null) {
     return RootInProgress;
   }
@@ -197,10 +215,14 @@ function commitRoot(root) {
 
 function commitRootImpl(root) {
   const { finishedWork } = root;
+  console.log("commit", finishedWork.child.memoizedState.memoizedState[0]);
   root.callbackNode = null;
   root.callbackPriority = NoLane;
-  workInProgressRoot = null;
-  workInProgressRootRenderLanes = NoLanes;
+  const remainingLanes = mergeLanes(
+    finishedWork.lanes,
+    finishedWork.childLanes
+  );
+  markRootFinished(root, remainingLanes);
   if (
     (finishedWork.subtreeFlags & Passive) !== NoFlags ||
     (finishedWork.flags & Passive) !== NoFlags
@@ -223,6 +245,8 @@ function commitRootImpl(root) {
       rootWithPendingPassiveEffects = root;
     }
   }
+  root.current = finishedWork;
+  ensureRootIsScheduled(root, now());
 }
 
 function printFiber(fiber) {
@@ -353,6 +377,11 @@ export function requestUpdateLane() {
   }
   const eventLane = getCurrentEventPriority();
   return eventLane;
+}
+
+export function requestEventTime() {
+  currentEventTime = now();
+  return currentEventTime;
 }
 
 function sleep(time) {

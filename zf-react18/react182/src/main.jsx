@@ -345,22 +345,56 @@ import { createRoot } from "react-dom/client";
 import { getCurrentTime } from "../src/scheduler/src/forks/Scheduler";
 
 //40.高优更新打断低优更新(useRef)
+// function FunctionComponent() {
+//   const [numbers, setNumbers] = React.useState(new Array(10).fill("A"));
+//   const divRef = React.useRef();
+//   React.useEffect(() => {
+//     setTimeout(() => {
+//       divRef.current.click();
+//     }, 10);
+//     setNumbers((numbers) => numbers.map((item) => item + "B"));
+//   }, []);
+//   return (
+//     <div
+//       ref={divRef}
+//       onClick={() => {
+//         setNumbers((numbers) => numbers.map((item) => item + "C"));
+//       }}
+//     >
+//       {numbers.map((number, index) => (
+//         <span key={index}>{number}</span>
+//       ))}
+//     </div>
+//   );
+// }
+
+// 41.饥饿问题
+let counter = 0;
+let timer;
+let bCounter = 0;
+let cCounter = 0;
 function FunctionComponent() {
-  const [numbers, setNumbers] = React.useState(new Array(10).fill("A"));
+  const [numbers, setNumbers] = React.useState(new Array(100).fill("A"));
   const divRef = React.useRef();
+  const updateB = (numbers) => new Array(100).fill(numbers[0] + "B");
+  updateB.id = "updateB" + bCounter++;
+  const updateC = (numbers) => new Array(100).fill(numbers[0] + "C");
+  updateC.id = "updateC" + cCounter++;
   React.useEffect(() => {
-    setTimeout(() => {
+    timer = setInterval(() => {
+      console.log(divRef);
       divRef.current.click();
-    }, 10);
-    setNumbers((numbers) => numbers.map((item) => item + "B"));
+      if (counter++ === 0) {
+        setNumbers(updateB);
+      }
+      divRef.current.click();
+      if (counter++ > 10) {
+        clearInterval(timer);
+      }
+    });
   }, []);
   return (
-    <div
-      ref={divRef}
-      onClick={() => {
-        setNumbers((numbers) => numbers.map((item) => item + "C"));
-      }}
-    >
+    <div ref={divRef} onClick={() => setNumbers(updateC)}>
       {numbers.map((number, index) => (
         <span key={index}>{number}</span>
       ))}

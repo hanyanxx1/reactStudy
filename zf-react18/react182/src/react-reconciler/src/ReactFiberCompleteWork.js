@@ -13,19 +13,26 @@ import {
   FunctionComponent,
 } from "./ReactWorkTags";
 import { Ref, NoFlags, Update } from "./ReactFiberFlags";
+import { NoLanes, mergeLanes } from "./ReactFiberLane";
 
 function markRef(workInProgress) {
   workInProgress.flags |= Ref;
 }
 
 function bubbleProperties(completedWork) {
+  let newChildLanes = NoLanes;
   let subtreeFlags = NoFlags;
   let child = completedWork.child;
   while (child !== null) {
+    newChildLanes = mergeLanes(
+      newChildLanes,
+      mergeLanes(child.lanes, child.childLanes)
+    );
     subtreeFlags |= child.subtreeFlags;
     subtreeFlags |= child.flags;
     child = child.sibling;
   }
+  completedWork.childLanes = newChildLanes;
   completedWork.subtreeFlags |= subtreeFlags;
 }
 function appendAllChildren(parent, workInProgress) {
@@ -71,7 +78,7 @@ function updateHostComponent(current, workInProgress, type, newProps) {
   }
 }
 export function completeWork(current, workInProgress) {
-  logger("completeWork", workInProgress);
+  // logger("completeWork", workInProgress);
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
     case HostComponent: {
@@ -81,7 +88,7 @@ export function completeWork(current, workInProgress) {
         if (current.ref !== workInProgress.ref) {
           markRef(workInProgress);
         }
-        console.log("updatePayload", workInProgress.updateQueue);
+        // console.log("updatePayload", workInProgress.updateQueue);
       } else {
         const instance = createInstance(type, newProps, workInProgress);
         appendAllChildren(instance, workInProgress);
