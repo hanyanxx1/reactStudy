@@ -12,7 +12,12 @@ import {
   HostText,
   FunctionComponent,
 } from "./ReactWorkTags";
-import { NoFlags, Update } from "./ReactFiberFlags";
+import { Ref, NoFlags, Update } from "./ReactFiberFlags";
+
+function markRef(workInProgress) {
+  workInProgress.flags |= Ref;
+}
+
 function bubbleProperties(completedWork) {
   let subtreeFlags = NoFlags;
   let child = completedWork.child;
@@ -73,12 +78,18 @@ export function completeWork(current, workInProgress) {
       const { type } = workInProgress;
       if (current !== null && workInProgress.stateNode != null) {
         updateHostComponent(current, workInProgress, type, newProps);
+        if (current.ref !== workInProgress.ref) {
+          markRef(workInProgress);
+        }
         console.log("updatePayload", workInProgress.updateQueue);
       } else {
         const instance = createInstance(type, newProps, workInProgress);
         appendAllChildren(instance, workInProgress);
         workInProgress.stateNode = instance;
         finalizeInitialChildren(instance, type, newProps);
+        if (workInProgress.ref !== null) {
+          markRef(workInProgress);
+        }
       }
       bubbleProperties(workInProgress);
       break;

@@ -16,12 +16,17 @@ export function markRootUpdated(root, updateLane) {
   root.pendingLanes |= updateLane;
 }
 
-export function getNextLanes(root) {
+export function getNextLanes(root, wipLanes) {
   const pendingLanes = root.pendingLanes;
   if (pendingLanes === NoLanes) {
     return NoLanes;
   }
   const nextLanes = getHighestPriorityLanes(pendingLanes);
+  if (wipLanes !== NoLanes && wipLanes !== nextLanes) {
+    if (nextLanes >= wipLanes) {
+      return wipLanes;
+    }
+  }
   return nextLanes;
 }
 

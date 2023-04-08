@@ -24,7 +24,7 @@ const frameInterval = frameYieldMs;
 const channel = new MessageChannel();
 const port = channel.port2;
 
-const getCurrentTime = () => performance.now();
+export const getCurrentTime = () => performance.now();
 channel.port1.onmessage = performWorkUntilDeadline;
 
 function schedulePerformWorkUntilDeadline() {
@@ -133,8 +133,13 @@ function workLoop(initialTime) {
   return false;
 }
 
+function unstable_cancelCallback(task) {
+  task.callback = null;
+}
+
 export {
   NormalPriority as unstable_NormalPriority,
   unstable_scheduleCallback,
+  unstable_cancelCallback,
   shouldYieldToHost as unstable_shouldYield,
 };

@@ -10,6 +10,7 @@ import {
   Placement,
   Update,
   LayoutMask,
+  Ref,
 } from "./ReactFiberFlags";
 import {
   insertBefore,
@@ -331,6 +332,9 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
     case HostComponent: {
       recursivelyTraverseMutationEffects(root, finishedWork);
       commitReconciliationEffects(finishedWork);
+      if (flags & Ref) {
+        commitAttachRef(finishedWork);
+      }
       if (flags & Update) {
         const instance = finishedWork.stateNode;
         if (instance != null) {
@@ -360,6 +364,18 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
     }
     default: {
       break;
+    }
+  }
+}
+
+function commitAttachRef(finishedWork) {
+  const ref = finishedWork.ref;
+  if (ref !== null) {
+    const instance = finishedWork.stateNode;
+    if (typeof ref === "function") {
+      ref(instance);
+    } else {
+      ref.current = instance;
     }
   }
 }

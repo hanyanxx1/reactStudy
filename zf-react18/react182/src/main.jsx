@@ -323,22 +323,48 @@ import { createRoot } from "react-dom/client";
 // }
 
 //39.批量更新
+// function FunctionComponent() {
+//   console.log("FunctionComponent");
+//   const [number, setNumber] = React.useState(0);
+//   React.useEffect(() => {
+//     setNumber((number) => number + 1);
+//     setNumber((number) => number + 1);
+//   }, []);
+//   return (
+//     <button
+//       onClick={() => {
+//         setNumber((number) => number + 1);
+//         setNumber((number) => number + 1);
+//       }}
+//     >
+//       {number}
+//     </button>
+//   );
+// }
+
+import { getCurrentTime } from "../src/scheduler/src/forks/Scheduler";
+
+//40.高优更新打断低优更新(useRef)
 function FunctionComponent() {
-  console.log("FunctionComponent");
-  const [number, setNumber] = React.useState(0);
+  const [numbers, setNumbers] = React.useState(new Array(10).fill("A"));
+  const divRef = React.useRef();
   React.useEffect(() => {
-    setNumber((number) => number + 1);
-    setNumber((number) => number + 1);
+    setTimeout(() => {
+      divRef.current.click();
+    }, 10);
+    setNumbers((numbers) => numbers.map((item) => item + "B"));
   }, []);
   return (
-    <button
+    <div
+      ref={divRef}
       onClick={() => {
-        setNumber((number) => number + 1);
-        setNumber((number) => number + 1);
+        setNumbers((numbers) => numbers.map((item) => item + "C"));
       }}
     >
-      {number}
-    </button>
+      {numbers.map((number, index) => (
+        <span key={index}>{number}</span>
+      ))}
+    </div>
   );
 }
 

@@ -5,6 +5,7 @@ import {
   NormalPriority as NormalSchedulerPriority,
   IdlePriority as IdleSchedulerPriority,
   shouldYield,
+  cancelCallback as Scheduler_cancelCallback,
 } from "./Scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
@@ -70,7 +71,11 @@ export function scheduleUpdateOnFiber(root, fiber, lane) {
 }
 
 function ensureRootIsScheduled(root) {
-  const nextLanes = getNextLanes(root, NoLanes);
+  const existingCallbackNode = root.callbackNode;
+  const nextLanes = getNextLanes(
+    root,
+    root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes
+  );
   if (nextLanes === NoLanes) {
     root.callbackNode = null;
     root.callbackPriority = NoLane;
@@ -80,6 +85,9 @@ function ensureRootIsScheduled(root) {
   const existingCallbackPriority = root.callbackPriority;
   if (existingCallbackPriority === newCallbackPriority) {
     return;
+  }
+  if (existingCallbackNode != null) {
+    Scheduler_cancelCallback(existingCallbackNode);
   }
   let newCallbackNode;
   if (newCallbackPriority === SyncLane) {
