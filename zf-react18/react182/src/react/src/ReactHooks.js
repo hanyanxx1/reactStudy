@@ -20,12 +20,17 @@ export function useEffect(create, deps) {
   return dispatcher.useEffect(create, deps);
 }
 
-export function useLayoutEffect(create,deps) {
+export function useLayoutEffect(create, deps) {
   const dispatcher = resolveDispatcher();
-  return dispatcher.useLayoutEffect(create,deps);
+  return dispatcher.useLayoutEffect(create, deps);
 }
 
 export function useRef(initialValue) {
   const dispatcher = resolveDispatcher();
   return dispatcher.useRef(initialValue);
+}
+
+export function useContext(Context) {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useContext(Context);
 }

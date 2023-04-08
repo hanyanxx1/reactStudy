@@ -4,6 +4,7 @@ import {
   HostText,
   IndeterminateComponent,
   FunctionComponent,
+  ContextProvider,
 } from "./ReactWorkTags";
 import {
   processUpdateQueue,
@@ -14,6 +15,7 @@ import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHost
 import logger from "shared/logger";
 import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
 import { NoLanes } from "./ReactFiberLane";
+import { pushProvider } from "./ReactFiberNewContext";
 
 function reconcileChildren(current, workInProgress, nextChildren) {
   if (current === null) {
@@ -74,7 +76,7 @@ function updateFunctionComponent(
   return workInProgress.child;
 }
 export function beginWork(current, workInProgress, renderLanes) {
-  // logger("beginWork", workInProgress);
+  logger("beginWork", workInProgress);
   workInProgress.lanes = NoLanes;
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
@@ -101,7 +103,21 @@ export function beginWork(current, workInProgress, renderLanes) {
     case HostComponent:
       return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
+      return null;
+    case ContextProvider:
+      return updateContextProvider(current, workInProgress, renderLanes);
     default:
       return null;
   }
+}
+
+function updateContextProvider(current, workInProgress, renderLanes) {
+  const providerType = workInProgress.type;
+  const context = providerType._context;
+  const newProps = workInProgress.pendingProps;
+  const newValue = newProps.value;
+  pushProvider(context, newValue);
+  const newChildren = newProps.children;
+  reconcileChildren(current, workInProgress, newChildren, renderLanes);
+  return workInProgress.child;
 }

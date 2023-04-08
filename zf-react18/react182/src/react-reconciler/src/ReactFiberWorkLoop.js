@@ -192,7 +192,7 @@ function renderRootConcurrent(root, lanes) {
 function workLoopConcurrent() {
   sleep(6);
   performUnitOfWork(workInProgress);
-  console.log("shouldYield()", shouldYield(), workInProgress?.type);
+  // console.log("shouldYield()", shouldYield(), workInProgress?.type);
 }
 
 export function flushPassiveEffects() {
@@ -331,6 +331,8 @@ function renderRootSync(root, lanes) {
     prepareFreshStack(root, lanes);
   }
   workLoopSync();
+  workInProgressRoot = null;
+  workInProgressRootRenderLanes = NoLanes;
   return workInProgressRootExitStatus;
 }
 

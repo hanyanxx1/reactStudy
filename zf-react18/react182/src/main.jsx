@@ -369,40 +369,78 @@ import { getCurrentTime } from "../src/scheduler/src/forks/Scheduler";
 // }
 
 // 41.饥饿问题
-let counter = 0;
-let timer;
-let bCounter = 0;
-let cCounter = 0;
-function FunctionComponent() {
-  const [numbers, setNumbers] = React.useState(new Array(100).fill("A"));
-  const divRef = React.useRef();
-  const updateB = (numbers) => new Array(100).fill(numbers[0] + "B");
-  updateB.id = "updateB" + bCounter++;
-  const updateC = (numbers) => new Array(100).fill(numbers[0] + "C");
-  updateC.id = "updateC" + cCounter++;
-  React.useEffect(() => {
-    timer = setInterval(() => {
-      console.log(divRef);
-      divRef.current.click();
-      if (counter++ === 0) {
-        setNumbers(updateB);
-      }
-      divRef.current.click();
-      if (counter++ > 10) {
-        clearInterval(timer);
-      }
-    });
-  }, []);
+// let counter = 0;
+// let timer;
+// let bCounter = 0;
+// let cCounter = 0;
+// function FunctionComponent() {
+//   const [numbers, setNumbers] = React.useState(new Array(100).fill("A"));
+//   const divRef = React.useRef();
+//   const updateB = (numbers) => new Array(100).fill(numbers[0] + "B");
+//   updateB.id = "updateB" + bCounter++;
+//   const updateC = (numbers) => new Array(100).fill(numbers[0] + "C");
+//   updateC.id = "updateC" + cCounter++;
+//   React.useEffect(() => {
+//     timer = setInterval(() => {
+//       console.log(divRef);
+//       divRef.current.click();
+//       if (counter++ === 0) {
+//         setNumbers(updateB);
+//       }
+//       divRef.current.click();
+//       if (counter++ > 10) {
+//         clearInterval(timer);
+//       }
+//     });
+//   }, []);
+//   return (
+//     <div ref={divRef} onClick={() => setNumbers(updateC)}>
+//       {numbers.map((number, index) => (
+//         <span key={index}>{number}</span>
+//       ))}
+//     </div>
+//   );
+// }
+
+// const element = <FunctionComponent />;
+
+//42.context
+const NameContext = React.createContext("");
+const AgeContext = React.createContext("");
+
+function Child() {
+  const name = React.useContext(NameContext);
+  const age = React.useContext(AgeContext);
+  return <button>{name + age}</button>;
+}
+function App() {
+  const [name, setName] = React.useState("a");
+  const [age, setAge] = React.useState("1");
   return (
-    <div ref={divRef} onClick={() => setNumbers(updateC)}>
-      {numbers.map((number, index) => (
-        <span key={index}>{number}</span>
-      ))}
+    <div>
+      <button
+        onClick={() => {
+          setName(name + "a");
+        }}
+      >
+        setName
+      </button>
+      <button
+        onClick={() => {
+          setAge(age + "1");
+        }}
+      >
+        setAge
+      </button>
+      <NameContext.Provider value={name}>
+        <AgeContext.Provider value={age}>
+          <Child />
+        </AgeContext.Provider>
+      </NameContext.Provider>
     </div>
   );
 }
 
-const element = <FunctionComponent />;
-
+const element = <App />;
 const root = createRoot(document.getElementById("root"));
 root.render(element);

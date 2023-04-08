@@ -3,6 +3,7 @@ import {
   HostComponent,
   HostText,
   FunctionComponent,
+  ContextProvider,
 } from "./ReactWorkTags";
 import {
   Passive,
@@ -358,6 +359,11 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
       break;
     }
     case HostText: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      break;
+    }
+    case ContextProvider: {
       recursivelyTraverseMutationEffects(root, finishedWork);
       commitReconciliationEffects(finishedWork);
       break;

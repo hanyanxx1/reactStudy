@@ -11,6 +11,7 @@ import {
   HostRoot,
   HostText,
   FunctionComponent,
+  ContextProvider,
 } from "./ReactWorkTags";
 import { Ref, NoFlags, Update } from "./ReactFiberFlags";
 import { NoLanes, mergeLanes } from "./ReactFiberLane";
@@ -78,7 +79,7 @@ function updateHostComponent(current, workInProgress, type, newProps) {
   }
 }
 export function completeWork(current, workInProgress) {
-  // logger("completeWork", workInProgress);
+  logger("completeWork", workInProgress);
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
     case HostComponent: {
@@ -110,6 +111,10 @@ export function completeWork(current, workInProgress) {
     case HostText: {
       const newText = newProps;
       workInProgress.stateNode = createTextInstance(newText);
+      bubbleProperties(workInProgress);
+      break;
+    }
+    case ContextProvider: {
       bubbleProperties(workInProgress);
       break;
     }

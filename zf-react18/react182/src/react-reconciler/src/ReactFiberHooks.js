@@ -16,6 +16,7 @@ import {
   Layout as HookLayout,
 } from "./ReactHookEffectTags";
 import { NoLanes, NoLane, mergeLanes, isSubsetOfLanes } from "./ReactFiberLane";
+import { readContext } from './ReactFiberNewContext';
 
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
@@ -67,6 +68,7 @@ const HooksDispatcherOnMountInDEV = {
   useEffect: mountEffect,
   useLayoutEffect: mountLayoutEffect,
   useRef: mountRef,
+  useContext: readContext
 };
 
 const HooksDispatcherOnUpdateInDEV = {
@@ -75,6 +77,7 @@ const HooksDispatcherOnUpdateInDEV = {
   useEffect: updateEffect,
   useLayoutEffect: updateLayoutEffect,
   useRef: updateRef,
+  useContext: readContext
 };
 
 function mountRef(initialValue) {
@@ -354,7 +357,13 @@ function dispatchSetState(fiber, queue, action) {
   scheduleUpdateOnFiber(root, fiber, lane);
 }
 
-export function renderWithHooks(current, workInProgress, Component, props, nextRenderLanes) {
+export function renderWithHooks(
+  current,
+  workInProgress,
+  Component,
+  props,
+  nextRenderLanes
+) {
   renderLanes = nextRenderLanes;
   currentlyRenderingFiber = workInProgress;
   workInProgress.updateQueue = null;

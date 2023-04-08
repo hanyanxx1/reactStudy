@@ -3,9 +3,11 @@ import {
   IndeterminateComponent,
   HostComponent,
   HostText,
+  ContextProvider,
 } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
 import { NoLanes } from "./ReactFiberLane";
+import { REACT_PROVIDER_TYPE } from "shared/ReactSymbols";
 
 export function FiberNode(tag, pendingProps, key) {
   this.tag = tag;
@@ -80,6 +82,20 @@ export function createFiberFromTypeAndProps(type, key, pendingProps) {
   let fiberTag = IndeterminateComponent;
   if (typeof type === "string") {
     fiberTag = HostComponent;
+  } else {
+    getTag: switch (type) {
+      default: {
+        if (typeof type === "object" && type !== null) {
+          switch (type.$$typeof) {
+            case REACT_PROVIDER_TYPE:
+              fiberTag = ContextProvider;
+              break getTag;
+            default:
+              break;
+          }
+        }
+      }
+    }
   }
   const fiber = createFiber(fiberTag, pendingProps, key);
   fiber.type = type;
