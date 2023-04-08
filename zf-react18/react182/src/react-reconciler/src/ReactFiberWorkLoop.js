@@ -77,6 +77,10 @@ function ensureRootIsScheduled(root) {
     return;
   }
   const newCallbackPriority = getHighestPriorityLane(nextLanes);
+  const existingCallbackPriority = root.callbackPriority;
+  if (existingCallbackPriority === newCallbackPriority) {
+    return;
+  }
   let newCallbackNode;
   if (newCallbackPriority === SyncLane) {
     scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
@@ -110,6 +114,7 @@ function ensureRootIsScheduled(root) {
       performConcurrentWorkOnRoot.bind(null, root)
     );
   }
+  root.callbackPriority = newCallbackPriority;
   root.callbackNode = newCallbackNode;
 }
 

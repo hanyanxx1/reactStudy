@@ -313,13 +313,33 @@ import { createRoot } from "react-dom/client";
 // }
 
 //38.并发渲染
+// function FunctionComponent() {
+//   console.log("FunctionComponent");
+//   const [number, setNumber] = React.useState(0);
+//   React.useEffect(() => {
+//     setNumber((number) => number + 1);
+//   }, []);
+//   return <button onClick={() => setNumber(number + 1)}>{number}</button>;
+// }
+
+//39.批量更新
 function FunctionComponent() {
   console.log("FunctionComponent");
   const [number, setNumber] = React.useState(0);
   React.useEffect(() => {
     setNumber((number) => number + 1);
+    setNumber((number) => number + 1);
   }, []);
-  return <button onClick={() => setNumber(number + 1)}>{number}</button>;
+  return (
+    <button
+      onClick={() => {
+        setNumber((number) => number + 1);
+        setNumber((number) => number + 1);
+      }}
+    >
+      {number}
+    </button>
+  );
 }
 
 const element = <FunctionComponent />;

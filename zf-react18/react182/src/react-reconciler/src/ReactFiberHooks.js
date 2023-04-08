@@ -11,6 +11,7 @@ import {
   Passive as HookPassive,
   Layout as HookLayout,
 } from "./ReactHookEffectTags";
+import { NoLanes } from "./ReactFiberLane";
 
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
@@ -249,13 +250,20 @@ function dispatchSetState(fiber, queue, action) {
     eagerState: null,
     next: null,
   };
-  const lastRenderedReducer = queue.lastRenderedReducer;
-  const currentState = queue.lastRenderedState;
-  const eagerState = lastRenderedReducer(currentState, action);
-  update.hasEagerState = true;
-  update.eagerState = eagerState;
-  if (is(eagerState, currentState)) {
-    return;
+  const alternate = fiber.alternate;
+  if (
+    fiber.lanes === NoLanes &&
+    (alternate === null || alternate.lanes === NoLanes)
+  ) {
+    debugger;
+    const lastRenderedReducer = queue.lastRenderedReducer;
+    const currentState = queue.lastRenderedState;
+    const eagerState = lastRenderedReducer(currentState, action);
+    update.hasEagerState = true;
+    update.eagerState = eagerState;
+    if (is(eagerState, currentState)) {
+      return;
+    }
   }
   const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
   scheduleUpdateOnFiber(root, fiber, lane);
