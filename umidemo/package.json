@@ -9,11 +9,14 @@
     "start": "npm run dev"
   },
   "dependencies": {
+    "antd": "^5.4.2",
+    "styled-components": "^5.3.9",
     "umi": "^4.0.65"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
+    "@types/styled-components": "^5.1.26",
     "typescript": "^5.0.3"
   }
 }

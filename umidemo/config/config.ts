@@ -1,12 +1,7 @@
 import { defineConfig } from "umi";
+import routes from "./routes";
 
 export default defineConfig({
-  routes: [
-    { path: "/", component: "index" },
-    { path: "/docs", component: "docs" },
-  ],
-  npmClient: "pnpm",
-
   // 关闭sourceMap文件的生成
   devtool: false,
   hash: true,
@@ -26,6 +21,7 @@ export default defineConfig({
     type: "hash",
   },
   historyWithQuery: {},
+  routes,
 
   //跨域代理
   proxy: {
