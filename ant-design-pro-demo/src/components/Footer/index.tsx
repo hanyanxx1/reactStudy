@@ -1,15 +1,8 @@
 import { GithubOutlined } from '@ant-design/icons';
 import { DefaultFooter } from '@ant-design/pro-components';
-import { useIntl } from '@umijs/max';
 import React from 'react';
 
-const Footer: React.FC = () => {
-  const intl = useIntl();
-  const defaultMessage = intl.formatMessage({
-    id: 'app.copyright.produced',
-    defaultMessage: '蚂蚁集团体验技术部出品',
-  });
-
+const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -17,24 +10,24 @@ const Footer: React.FC = () => {
       style={{
         background: 'none',
       }}
-      copyright={`${currentYear} ${defaultMessage}`}
+      copyright={`${currentYear} hy练习`}
       links={[
         {
-          key: 'Ant Design Pro',
-          title: 'Ant Design Pro',
-          href: 'https://pro.ant.design',
+          key: 'hy练习',
+          title: '个人练习',
+          href: 'https://github.com/hanyanxx1/reactStudy',
           blankTarget: true,
         },
         {
-          key: 'github',
-          title: <GithubOutlined />,
-          href: 'https://github.com/ant-design/ant-design-pro',
+          key: '视频平台',
+          title: '视频平台',
+          href: 'https://www.javascriptpaixun.cn/',
           blankTarget: true,
         },
         {
-          key: 'Ant Design',
-          title: 'Ant Design',
-          href: 'https://ant.design',
+          key: '开源信息',
+          title: '开源信息',
+          href: 'https://github.com/newbee-ltd',
           blankTarget: true,
         },
       ]}
