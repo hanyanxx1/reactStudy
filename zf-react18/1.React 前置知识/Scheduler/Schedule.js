@@ -103,7 +103,8 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
     // 这个 push 是封装的最小堆 push 方法，将元素追加到数组后，它会再进行一个排序，保证最小值在数组的第一个
     push(timerQueue, newTask);
     // peek(taskQueue) 获取 taskQueue 的第一个任务，因为是最小堆结构，获取的是最紧急的任务
-    // 这个逻辑是在 taskQueue 为空的情况下才会调用，这是因为 taskQueue 不为空的情况下，它会在每个任务执行的时候都会遍历一下 timerQueue，将到期的任务移到 taskQueue
+    // 这个逻辑是在 taskQueue 为空的情况下才会调用，这是因为 taskQueue 不为空的情况下，
+    // 它会在每个任务执行的时候都会遍历一下 timerQueue，将到期的任务移到 taskQueue
     // newTask === peek(timerQueue) 表示新创建的任务就是最早的要安排调度的延时任务
     if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
       // 保证最多只有一个 requestHostTimeout 在执行
@@ -149,7 +150,10 @@ function schedulePerformWorkUntilDeadline() {
 }
 
 // 批量任务的开始时间
-// React 并不是每一个任务执行完都执行 schedulePerformWorkUntilDeadline 让出线程的，而是执行完一个任务，看看过了多久，如果时间不超过 5ms，那就再执行一个任务，等做完一个任务，发现过了 5ms，这才让出线程，所以 React 是一批一批任务执行的，startTime 记录的是这一批任务的开始时间，而不是单个任务的开始时间。
+// React 并不是每一个任务执行完都执行 schedulePerformWorkUntilDeadline 让出线程的，
+// 而是执行完一个任务，看看过了多久，如果时间不超过 5ms，那就再执行一个任务，等做完一个任务，
+// 发现过了 5ms，这才让出线程，所以 React 是一批一批任务执行的，
+// startTime 记录的是这一批任务的开始时间，而不是单个任务的开始时间。
 var startTime = -1;
 function performWorkUntilDeadline() {
   // scheduledHostCallback 就是 flushWork 这个函数
@@ -162,7 +166,8 @@ function performWorkUntilDeadline() {
       hasMoreWork = scheduledHostCallback(hasTimeRemaining, currentTime);
     } finally {
       if (hasMoreWork) {
-        // 如果在一个时间切片里没有完成所有任务，那就执行 schedulePerformWorkUntilDeadline，让出线程，等浏览器空闲了再继续执行
+        // 如果在一个时间切片里没有完成所有任务，那就执行 schedulePerformWorkUntilDeadline，
+        // 让出线程，等浏览器空闲了再继续执行
         schedulePerformWorkUntilDeadline();
       } else {
         isMessageLoopRunning = false;
@@ -176,7 +181,11 @@ function performWorkUntilDeadline() {
 
 function flushWork(hasTimeRemaining, initialTime) {
   isHostCallbackScheduled = false;
-  // 定时器的目的表面上是为了保证最早的延时任务准时安排调度，实际上是为了保证 timerQueue 中的任务都能被执行。定时器到期后，我们会执行 advanceTimers 和 flushWork，flushWork 中会执行 workLoop，workLoop 中会将 taskQueue 中的任务不断执行，当 taskQueue 执行完毕后，workLoop 会选择 timerQueue 中的最早的任务重新设置一个定时器。所以如果 flushWork 执行了，定时器也就没有必要了，所以可以取消了。
+  // 定时器的目的表面上是为了保证最早的延时任务准时安排调度，实际上是为了保证 timerQueue 中的任务都能被执行。
+  // 定时器到期后，我们会执行 advanceTimers 和 flushWork，flushWork 中会执行 workLoop，
+  // workLoop 中会将 taskQueue 中的任务不断执行，当 taskQueue 执行完毕后，
+  // workLoop 会选择 timerQueue 中的最早的任务重新设置一个定时器。
+  // 所以如果 flushWork 执行了，定时器也就没有必要了，所以可以取消了。
   if (isHostTimeoutScheduled) {
     isHostTimeoutScheduled = false;
     cancelHostTimeout();
@@ -240,7 +249,8 @@ function workLoop(hasTimeRemaining, initialTime) {
   if (currentTask !== null) {
     return true;
   } else {
-    // 如果 taskQueue 空了，timerQueue 中的最先执行的任务还没有到时间，那就执行一个 requestHostTimeout 定时器，保证准时执行
+    // 如果 taskQueue 空了，timerQueue 中的最先执行的任务还没有到时间，
+    // 那就执行一个 requestHostTimeout 定时器，保证准时执行
     const firstTimer = peek(timerQueue);
     if (firstTimer !== null) {
       requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);

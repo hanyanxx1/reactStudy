@@ -10,6 +10,7 @@
   <script>
     // 参考 MDN Background Tasks API 这篇文章
     // https://developer.mozilla.org/zh-CN/docs/Web/API/Background_Tasks_API#example
+    // https://juejin.cn/post/7166547963517337614
 
     const sleep = (delay) => {
       for (let start = Date.now(); Date.now() - start <= delay; ) {}
@@ -33,10 +34,7 @@
 
     function runTaskQueue(deadline) {
       console.log(`deadline: ${deadline.timeRemaining()}`);
-      while (
-        (deadline.timeRemaining() > 0 || deadline.didTimeout) &&
-        taskList.length
-      ) {
+      while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && taskList.length) {
         let task = taskList.shift();
         task();
       }

@@ -10,18 +10,20 @@
     <div>
       <button id="start" style="margin-bottom: 10px">开始</button>
       <button id="stop" style="margin-bottom: 10px">停止</button>
-      <div
-        id="test"
-        style="width: 100px; height: 100px; background-color: #333"
-      />
+      <div id="test" style="width: 100px; height: 100px; background-color: #333" />
     </div>
   </body>
   <script>
     const test = document.querySelector("#test");
     let previousTimeStamp = 0;
+    let cancelReq;
 
     document.querySelector("button").addEventListener("click", () => {
       requestAnimationFrame(animation);
+    });
+
+    document.querySelector("#stop").addEventListener("click", () => {
+      cancelAnimationFrame(cancelReq);
     });
 
     let count = 0;
@@ -36,7 +38,7 @@
         // console.log(elapsed);
       }
 
-      requestAnimationFrame(animation);
+      cancelReq = requestAnimationFrame(animation);
     }
   </script>
 </html>
