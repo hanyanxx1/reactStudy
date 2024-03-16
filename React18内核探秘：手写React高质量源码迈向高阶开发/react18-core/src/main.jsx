@@ -6,4 +6,4 @@ let element = (
   </h1>
 );
 const root = createRoot(document.getElementById("root"));
-console.log(root);
+root.render(element);
