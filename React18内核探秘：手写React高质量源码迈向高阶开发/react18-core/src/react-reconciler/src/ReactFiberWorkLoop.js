@@ -1,5 +1,7 @@
 import { scheduleCallback } from "scheduler";
+import { createWorkInProgress } from "./ReactFiber";
 
+let workInProgress = null;
 export function scheduleUpdateOnFiber(root) {
   ensureRootIsScheduled(root);
 }
@@ -9,5 +11,14 @@ function ensureRootIsScheduled(root) {
 }
 
 function performConcurrentWorkOnRoot(root) {
-  console.log(root);
+  renderRootSync(root);
+}
+
+function prepareFreshStack(root) {
+  workInProgress = createWorkInProgress(root.current, null);
+  console.log(workInProgress);
+}
+
+function renderRootSync(root) {
+  prepareFreshStack(root);
 }
