@@ -29,6 +29,7 @@ function updateHostComponent(current, workInProgress) {
   return workInProgress.child;
 }
 export function beginWork(current, workInProgress) {
+  indent.number += 2;
   logger(" ".repeat(indent.number) + "beginWork", workInProgress);
   switch (workInProgress.tag) {
     case HostRoot:

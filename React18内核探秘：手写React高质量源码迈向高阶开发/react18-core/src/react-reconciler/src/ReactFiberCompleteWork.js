@@ -1,7 +1,7 @@
 import {
   appendInitialChild,
-  createTextInstance,
   createInstance,
+  createTextInstance,
   finalizeInitialChildren,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
@@ -50,7 +50,7 @@ function appendAllChildren(parent, workInProgress) {
 }
 
 export function completeWork(current, workInProgress) {
-  indent.number += 2;
+  indent.number -= 2;
   logger(" ".repeat(indent.number) + "completeWork", workInProgress);
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
@@ -63,10 +63,9 @@ export function completeWork(current, workInProgress) {
       bubbleProperties(workInProgress);
       break;
     }
-    case HostRoot: {
+    case HostRoot:
       bubbleProperties(workInProgress);
       break;
-    }
     case HostText: {
       const newText = newProps;
       workInProgress.stateNode = createTextInstance(newText);
