@@ -1,3 +1,7 @@
+import getEventTarget from "./getEventTarget";
+import { getClosestInstanceFromNode } from "../client/ReactDOMComponentTree";
+import { dispatchEventForPluginEventSystem } from "./DOMPluginEventSystem";
+
 export function createEventListenerWrapperWithPriority(
   targetContainer,
   domEventName,
@@ -12,5 +16,13 @@ function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, native
 }
 
 export function dispatchEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
-  console.log("dispatchEvent", domEventName, eventSystemFlags, targetContainer, nativeEvent);
+  const nativeEventTarget = getEventTarget(nativeEvent);
+  const targetInst = getClosestInstanceFromNode(nativeEventTarget);
+  dispatchEventForPluginEventSystem(
+    domEventName,
+    eventSystemFlags,
+    nativeEvent,
+    targetInst,
+    targetContainer
+  );
 }
