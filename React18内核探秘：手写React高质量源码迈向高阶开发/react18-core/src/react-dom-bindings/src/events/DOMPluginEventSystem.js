@@ -75,7 +75,41 @@ function dispatchEventsForPlugins(
     eventSystemFlags,
     targetContainer
   );
-  console.log("dispatchQueue", dispatchQueue);
+  processDispatchQueue(dispatchQueue, eventSystemFlags);
+}
+
+export function processDispatchQueue(dispatchQueue, eventSystemFlags) {
+  const inCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0;
+  for (let i = 0; i < dispatchQueue.length; i++) {
+    const { event, listeners } = dispatchQueue[i];
+    processDispatchQueueItemsInOrder(event, listeners, inCapturePhase); //  event system doesn't use pooling.
+  }
+}
+
+function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase) {
+  if (inCapturePhase) {
+    for (let i = dispatchListeners.length - 1; i >= 0; i--) {
+      const { currentTarget, listener } = dispatchListeners[i];
+      if (event.isPropagationStopped()) {
+        return;
+      }
+      executeDispatch(event, listener, currentTarget);
+    }
+  } else {
+    for (let i = 0; i < dispatchListeners.length; i++) {
+      const { currentTarget, listener } = dispatchListeners[i];
+      if (event.isPropagationStopped()) {
+        return;
+      }
+      executeDispatch(event, listener, currentTarget);
+    }
+  }
+}
+
+function executeDispatch(event, listener, currentTarget) {
+  event.currentTarget = currentTarget;
+  listener(event);
+  event.currentTarget = null;
 }
 
 function extractEvents(
