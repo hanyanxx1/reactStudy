@@ -1,6 +1,10 @@
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags";
-import { MutationMask, Placement } from "./ReactFiberFlags";
-import { insertBefore, appendChild } from "react-dom-bindings/src/client/ReactDOMHostConfig";
+import { MutationMask, Placement, Update } from "./ReactFiberFlags";
+import {
+  insertBefore,
+  appendChild,
+  commitUpdate,
+} from "react-dom-bindings/src/client/ReactDOMHostConfig";
 
 function recursivelyTraverseMutationEffects(root, parentFiber) {
   if (parentFiber.subtreeFlags & MutationMask) {
@@ -114,10 +118,37 @@ function commitReconciliationEffects(finishedWork) {
 }
 
 export function commitMutationEffectsOnFiber(finishedWork, root) {
+  const current = finishedWork.alternate;
+  const flags = finishedWork.flags;
   switch (finishedWork.tag) {
-    case HostRoot:
-    case FunctionComponent:
-    case HostComponent:
+    case HostRoot: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      break;
+    }
+    case FunctionComponent: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      break;
+    }
+    case HostComponent: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      if (flags & Update) {
+        const instance = finishedWork.stateNode;
+        if (instance != null) {
+          const newProps = finishedWork.memoizedProps;
+          const oldProps = current !== null ? current.memoizedProps : newProps;
+          const type = finishedWork.type;
+          const updatePayload = finishedWork.updateQueue;
+          finishedWork.updateQueue = null;
+          if (updatePayload !== null) {
+            commitUpdate(instance, updatePayload, type, oldProps, newProps, finishedWork);
+          }
+        }
+      }
+      break;
+    }
     case HostText: {
       recursivelyTraverseMutationEffects(root, finishedWork);
       commitReconciliationEffects(finishedWork);
