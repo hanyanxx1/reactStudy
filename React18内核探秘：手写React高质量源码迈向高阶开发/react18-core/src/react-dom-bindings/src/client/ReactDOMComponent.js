@@ -25,7 +25,6 @@ export function setInitialProperties(domElement, tag, props) {
   setInitialDOMProperties(tag, domElement, props);
 }
 export function diffProperties(domElement, tag, lastProps, nextProps) {
-  debugger;
   let updatePayload = null;
   let propKey;
   let styleName;

@@ -64,7 +64,6 @@ function updateWorkInProgressHook() {
   if (workInProgressHook === null) {
     currentlyRenderingFiber.memoizedState = workInProgressHook = newHook;
   } else {
-    debugger;
     workInProgressHook = workInProgressHook.next = newHook;
   }
   return workInProgressHook;
