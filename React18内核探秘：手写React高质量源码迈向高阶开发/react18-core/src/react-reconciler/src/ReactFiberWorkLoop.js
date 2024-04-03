@@ -5,6 +5,7 @@ import { completeWork } from "./ReactFiberCompleteWork";
 import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork";
 import { HostComponent, HostRoot, HostText, FunctionComponent } from "./ReactWorkTags";
 import { NoFlags, Placement, Update, ChildDeletion, MutationMask } from "./ReactFiberFlags";
+import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 
 let workInProgress = null;
 export function scheduleUpdateOnFiber(root) {
@@ -98,6 +99,7 @@ function getFlags(flags) {
 
 function prepareFreshStack(root) {
   workInProgress = createWorkInProgress(root.current, null);
+  finishQueueingConcurrentUpdates();
 }
 function renderRootSync(root) {
   prepareFreshStack(root);

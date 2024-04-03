@@ -1,17 +1,44 @@
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 import isArray from "shared/isArray";
-import { createFiberFromElement, FiberNode, createFiberFromText } from "./ReactFiber";
+import {
+  createFiberFromElement,
+  FiberNode,
+  createFiberFromText,
+  createWorkInProgress,
+} from "./ReactFiber";
 import { Placement } from "./ReactFiberFlags";
 import { HostText } from "./ReactWorkTags";
 
 function createChildReconciler(shouldTrackSideEffects) {
+  function useFiber(fiber, pendingProps) {
+    const clone = createWorkInProgress(fiber, pendingProps);
+    clone.index = 0;
+    clone.sibling = null;
+    return clone;
+  }
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
+    const key = element.key;
+    let child = currentFirstChild;
+    while (child !== null) {
+      if (child.key === key) {
+        const elementType = element.type;
+        if (child.type === elementType) {
+          const existing = useFiber(child, element.props);
+          existing.return = returnFiber;
+          return existing;
+        }
+        debugger;
+        child = child.sibling;
+      }
+    }
     const created = createFiberFromElement(element);
     created.return = returnFiber;
     return created;
   }
   function placeSingleChild(newFiber) {
-    if (shouldTrackSideEffects) newFiber.flags |= Placement;
+    if (shouldTrackSideEffects && newFiber.alternate === null) {
+      newFiber.flags |= Placement;
+    }
     return newFiber;
   }
   function reconcileSingleTextNode(returnFiber, currentFirstChild, content) {
@@ -40,7 +67,9 @@ function createChildReconciler(shouldTrackSideEffects) {
   }
   function placeChild(newFiber, newIndex) {
     newFiber.index = newIndex;
-    if (shouldTrackSideEffects) newFiber.flags |= Placement;
+    if (shouldTrackSideEffects) {
+      newFiber.flags |= Placement;
+    }
   }
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
     let resultingFirstChild = null;
@@ -65,7 +94,8 @@ function createChildReconciler(shouldTrackSideEffects) {
     if (typeof newChild === "object" && newChild !== null) {
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
-          return placeSingleChild(reconcileSingleElement(returnFiber, currentFirstChild, newChild));
+          const newFiber = reconcileSingleElement(returnFiber, currentFirstChild, newChild);
+          return placeSingleChild(newFiber);
         }
         default:
           break;
