@@ -1,6 +1,7 @@
 import ReactSharedInternals from "shared/ReactSharedInternals";
 import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
 import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
+import is from "shared/objectIs";
 
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
@@ -30,6 +31,7 @@ function dispatchReducerAction(fiber, queue, action) {
 }
 const HooksDispatcherOnMountInDEV = {
   useReducer: mountReducer,
+  useState: mountState,
 };
 function mountReducer(reducer, initialArg) {
   const hook = mountWorkInProgressHook();
@@ -48,7 +50,11 @@ function mountReducer(reducer, initialArg) {
 }
 const HooksDispatcherOnUpdateInDEV = {
   useReducer: updateReducer,
+  useState: updateState,
 };
+function basicStateReducer(state, action) {
+  return typeof action === "function" ? action(state) : action;
+}
 function updateWorkInProgressHook() {
   if (currentHook === null) {
     const current = currentlyRenderingFiber.alternate;
@@ -81,7 +87,6 @@ function updateReducer(reducer) {
     let update = first;
     do {
       if (update.hasEagerState) {
-        debugger;
         newState = update.eagerState;
       } else {
         const action = update.action;
@@ -92,6 +97,40 @@ function updateReducer(reducer) {
   }
   hook.memoizedState = queue.lastRenderedState = newState;
   return [hook.memoizedState, queue.dispatch];
+}
+function mountState(initialState) {
+  const hook = mountWorkInProgressHook();
+  hook.memoizedState = hook.baseState = initialState;
+  const queue = {
+    pending: null,
+    dispatch: null,
+    lastRenderedReducer: basicStateReducer,
+    lastRenderedState: initialState,
+  };
+  hook.queue = queue;
+  const dispatch = (queue.dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue));
+  return [hook.memoizedState, dispatch];
+}
+function dispatchSetState(fiber, queue, action) {
+  const update = {
+    action,
+    hasEagerState: false,
+    eagerState: null,
+    next: null,
+  };
+  const lastRenderedReducer = queue.lastRenderedReducer;
+  const currentState = queue.lastRenderedState;
+  const eagerState = lastRenderedReducer(currentState, action);
+  update.hasEagerState = true;
+  update.eagerState = eagerState;
+  if (is(eagerState, currentState)) {
+    return;
+  }
+  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
+  scheduleUpdateOnFiber(root, fiber);
+}
+function updateState(initialState) {
+  return updateReducer(basicStateReducer, initialState);
 }
 export function renderWithHooks(current, workInProgress, Component, props) {
   currentlyRenderingFiber = workInProgress;

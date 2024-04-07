@@ -50,40 +50,42 @@ import { createRoot } from "react-dom/client";
 
 //========================================20.mountReducer============================================
 
-const reducer = (state, action) => {
-  if (action.type === "add") return state + 1;
-  // if (action.type === "mul") return state * 2;
-  return state;
-};
+// const reducer = (state, action) => {
+//   if (action.type === "add") return state + 1;
+//   // if (action.type === "mul") return state * 2;
+//   return state;
+// };
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useReducer(reducer, 0);
+//   // const [number1, setNumber1] = React.useReducer(reducer, 2);
+//   return (
+//     <button
+//       onClick={() => {
+//         setNumber({ type: "add" });
+//         // setNumber({ type: "mul" });
+//         // setNumber1({ type: "add" });
+//         // setNumber1({ type: "mul" });
+//       }}
+//     >
+//       {/* {number + number1} */}
+//       {number}
+//     </button>
+//   );
+// }
+
+// let element = <FunctionComponent />;
+// const root = createRoot(document.getElementById("root"));
+// root.render(element);
+
 function FunctionComponent() {
-  const [number, setNumber] = React.useReducer(reducer, 0);
-  // const [number1, setNumber1] = React.useReducer(reducer, 2);
-  return (
-    <button
-      onClick={() => {
-        setNumber({ type: "add" });
-        // setNumber({ type: "mul" });
-        // setNumber1({ type: "add" });
-        // setNumber1({ type: "mul" });
-      }}
-    >
-      {/* {number + number1} */}
-      {number}
-    </button>
-  );
+  console.log("FunctionComponent render");
+  const [number, setNumber] = React.useState(10);
+  return <button onClick={() => setNumber((number) => number + 1)}>{number}</button>;
 }
 
 let element = <FunctionComponent />;
 const root = createRoot(document.getElementById("root"));
 root.render(element);
-
-// function FunctionComponent() {
-//   console.log("FunctionComponent render");
-//   const [number, setNumber] = React.useState(10);
-//   return (
-//     <button onClick={() => setNumber((number) => number + 1)}>{number}</button>
-//   );
-// }
 
 //24.单节点(key 相同,类型相同)
 // function FunctionComponent() {
