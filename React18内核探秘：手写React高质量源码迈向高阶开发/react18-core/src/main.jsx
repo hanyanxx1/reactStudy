@@ -88,14 +88,32 @@ import { createRoot } from "react-dom/client";
 // root.render(element);
 
 //24.单节点(key 相同,类型相同)
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
+//   return number === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title" id="title">
+//       title
+//     </div>
+//   ) : (
+//     <div onClick={() => setNumber(number + 1)} key="title" id="title2">
+//       title2
+//     </div>
+//   );
+// }
+
+// let element = <FunctionComponent />;
+// const root = createRoot(document.getElementById("root"));
+// root.render(element);
+
+//25.单节点 key 不同,类型相同
 function FunctionComponent() {
   const [number, setNumber] = React.useState(0);
   return number === 0 ? (
-    <div onClick={() => setNumber(number + 1)} key="title" id="title">
+    <div onClick={() => setNumber(number + 1)} key="title1" id="title">
       title
     </div>
   ) : (
-    <div onClick={() => setNumber(number + 1)} key="title" id="title2">
+    <div onClick={() => setNumber(number + 1)} key="title2" id="title2">
       title2
     </div>
   );
@@ -104,20 +122,6 @@ function FunctionComponent() {
 let element = <FunctionComponent />;
 const root = createRoot(document.getElementById("root"));
 root.render(element);
-
-//25.单节点 key 不同,类型相同
-// function FunctionComponent() {
-//   const [number, setNumber] = React.useState(0);
-//   return number === 0 ? (
-//     <div onClick={() => setNumber(number + 1)} key="title1" id="title">
-//       title
-//     </div>
-//   ) : (
-//     <div onClick={() => setNumber(number + 1)} key="title2" id="title2">
-//       title2
-//     </div>
-//   );
-// }
 
 //26.单节点 key 相同,类型不同
 // function FunctionComponent() {
