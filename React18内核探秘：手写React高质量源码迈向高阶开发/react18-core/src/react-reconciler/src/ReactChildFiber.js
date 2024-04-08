@@ -28,6 +28,17 @@ function createChildReconciler(shouldTrackSideEffects) {
       deletions.push(childToDelete);
     }
   }
+  function deleteRemainingChildren(returnFiber, currentFirstChild) {
+    if (!shouldTrackSideEffects) {
+      return null;
+    }
+    let childToDelete = currentFirstChild;
+    while (childToDelete !== null) {
+      deleteChild(returnFiber, childToDelete);
+      childToDelete = childToDelete.sibling;
+    }
+    return null;
+  }
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
     const key = element.key;
     let child = currentFirstChild;
@@ -35,10 +46,13 @@ function createChildReconciler(shouldTrackSideEffects) {
       if (child.key === key) {
         const elementType = element.type;
         if (child.type === elementType) {
+          deleteRemainingChildren(returnFiber, child.sibling);
           const existing = useFiber(child, element.props);
           existing.return = returnFiber;
           return existing;
         }
+        deleteRemainingChildren(returnFiber, child);
+        break;
       } else {
         deleteChild(returnFiber, child);
       }
