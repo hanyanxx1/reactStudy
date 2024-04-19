@@ -94,18 +94,63 @@ function createChildReconciler(shouldTrackSideEffects) {
   }
   function placeChild(newFiber, newIndex) {
     newFiber.index = newIndex;
-    if (shouldTrackSideEffects) {
+    if (!shouldTrackSideEffects) {
+      return;
+    }
+    const current = newFiber.alternate;
+    if (current !== null) {
+      return;
+    } else {
       newFiber.flags |= Placement;
     }
   }
+
+  function updateElement(returnFiber, current, element) {
+    const elementType = element.type;
+    if (current !== null) {
+      if (current.type === elementType) {
+        const existing = useFiber(current, element.props);
+        existing.return = returnFiber;
+        return existing;
+      }
+    }
+    const created = createFiberFromElement(element);
+    created.return = returnFiber;
+    return created;
+  }
+  function updateSlot(returnFiber, oldFiber, newChild) {
+    const key = oldFiber !== null ? oldFiber.key : null;
+    if (typeof newChild === "object" && newChild !== null) {
+      switch (newChild.$$typeof) {
+        case REACT_ELEMENT_TYPE: {
+          if (newChild.key === key) {
+            return updateElement(returnFiber, oldFiber, newChild);
+          }
+        }
+        default:
+          debugger;
+          return null;
+      }
+      return null;
+    }
+  }
+
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
     let resultingFirstChild = null;
     let previousNewFiber = null;
     let newIdx = 0;
-    for (; newIdx < newChildren.length; newIdx++) {
-      const newFiber = createChild(returnFiber, newChildren[newIdx]);
+    let oldFiber = currentFirstChild;
+    let nextOldFiber = null;
+    for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
+      nextOldFiber = oldFiber.sibling;
+      const newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx]);
       if (newFiber === null) {
-        continue;
+        break;
+      }
+      if (shouldTrackSideEffects) {
+        if (oldFiber && newFiber.alternate === null) {
+          deleteChild(returnFiber, oldFiber);
+        }
       }
       placeChild(newFiber, newIdx);
       if (previousNewFiber === null) {
@@ -114,6 +159,26 @@ function createChildReconciler(shouldTrackSideEffects) {
         previousNewFiber.sibling = newFiber;
       }
       previousNewFiber = newFiber;
+      oldFiber = nextOldFiber;
+    }
+    if (newIdx === newChildren.length) {
+      deleteRemainingChildren(returnFiber, oldFiber);
+      return resultingFirstChild;
+    }
+    if (oldFiber === null) {
+      for (; newIdx < newChildren.length; newIdx++) {
+        const newFiber = createChild(returnFiber, newChildren[newIdx]);
+        if (newFiber === null) {
+          continue;
+        }
+        placeChild(newFiber, newIdx);
+        if (previousNewFiber === null) {
+          resultingFirstChild = newFiber;
+        } else {
+          previousNewFiber.sibling = newFiber;
+        }
+        previousNewFiber = newFiber;
+      }
     }
     return resultingFirstChild;
   }

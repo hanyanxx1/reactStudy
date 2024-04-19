@@ -115,7 +115,6 @@ function getHostSibling(fiber) {
       }
       node = node.return;
     }
-    debugger;
     // node.sibling.return = node.return
     node = node.sibling;
     while (node.tag !== HostComponent && node.tag !== HostText) {
@@ -142,7 +141,6 @@ function commitPlacement(finishedWork) {
   const parentFiber = getHostParentFiber(finishedWork);
   switch (parentFiber.tag) {
     case HostComponent: {
-      debugger;
       const parent = parentFiber.stateNode;
       const before = getHostSibling(finishedWork);
       insertOrAppendPlacementNode(finishedWork, before, parent);
