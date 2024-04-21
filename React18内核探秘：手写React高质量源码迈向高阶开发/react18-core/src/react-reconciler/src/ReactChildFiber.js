@@ -92,16 +92,23 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
     return null;
   }
-  function placeChild(newFiber, newIndex) {
+  function placeChild(newFiber, lastPlacedIndex, newIndex) {
     newFiber.index = newIndex;
     if (!shouldTrackSideEffects) {
       return;
     }
     const current = newFiber.alternate;
     if (current !== null) {
-      return;
+      const oldIndex = current.index;
+      if (oldIndex < lastPlacedIndex) {
+        newFiber.flags |= Placement;
+        return lastPlacedIndex;
+      } else {
+        return oldIndex;
+      }
     } else {
       newFiber.flags |= Placement;
+      return lastPlacedIndex;
     }
   }
 
@@ -128,19 +135,58 @@ function createChildReconciler(shouldTrackSideEffects) {
           }
         }
         default:
-          debugger;
           return null;
       }
       return null;
     }
   }
-
+  function mapRemainingChildren(returnFiber, currentFirstChild) {
+    const existingChildren = new Map();
+    let existingChild = currentFirstChild;
+    while (existingChild !== null) {
+      if (existingChild.key !== null) {
+        existingChildren.set(existingChild.key, existingChild);
+      } else {
+        existingChildren.set(existingChild.index, existingChild);
+      }
+      existingChild = existingChild.sibling;
+    }
+    return existingChildren;
+  }
+  function updateTextNode(returnFiber, current, textContent) {
+    if (current === null || current.tag !== HostText) {
+      const created = createFiberFromText(textContent);
+      created.return = returnFiber;
+      return created;
+    } else {
+      const existing = useFiber(current, textContent);
+      existing.return = returnFiber;
+      return existing;
+    }
+  }
+  function updateFromMap(existingChildren, returnFiber, newIdx, newChild) {
+    if ((typeof newChild === "string" && newChild !== "") || typeof newChild === "number") {
+      const matchedFiber = existingChildren.get(newIdx) || null;
+      return updateTextNode(returnFiber, matchedFiber, "" + newChild);
+    }
+    if (typeof newChild === "object" && newChild !== null) {
+      switch (newChild.$$typeof) {
+        case REACT_ELEMENT_TYPE: {
+          const matchedFiber =
+            existingChildren.get(newChild.key === null ? newIdx : newChild.key) || null;
+          return updateElement(returnFiber, matchedFiber, newChild);
+        }
+      }
+    }
+    return null;
+  }
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
     let resultingFirstChild = null;
     let previousNewFiber = null;
     let newIdx = 0;
     let oldFiber = currentFirstChild;
     let nextOldFiber = null;
+    let lastPlacedIndex = 0;
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       nextOldFiber = oldFiber.sibling;
       const newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx]);
@@ -152,7 +198,7 @@ function createChildReconciler(shouldTrackSideEffects) {
           deleteChild(returnFiber, oldFiber);
         }
       }
-      placeChild(newFiber, newIdx);
+      lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
       if (previousNewFiber === null) {
         resultingFirstChild = newFiber;
       } else {
@@ -171,7 +217,7 @@ function createChildReconciler(shouldTrackSideEffects) {
         if (newFiber === null) {
           continue;
         }
-        placeChild(newFiber, newIdx);
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
         if (previousNewFiber === null) {
           resultingFirstChild = newFiber;
         } else {
@@ -179,6 +225,27 @@ function createChildReconciler(shouldTrackSideEffects) {
         }
         previousNewFiber = newFiber;
       }
+    }
+    const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
+    for (; newIdx < newChildren.length; newIdx++) {
+      const newFiber = updateFromMap(existingChildren, returnFiber, newIdx, newChildren[newIdx]);
+      if (newFiber !== null) {
+        if (shouldTrackSideEffects) {
+          if (newFiber.alternate !== null) {
+            existingChildren.delete(newFiber.key === null ? newIdx : newFiber.key);
+          }
+        }
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+        if (previousNewFiber === null) {
+          resultingFirstChild = newFiber;
+        } else {
+          previousNewFiber.sibling = newFiber;
+        }
+        previousNewFiber = newFiber;
+      }
+    }
+    if (shouldTrackSideEffects) {
+      existingChildren.forEach((child) => deleteChild(returnFiber, child));
     }
     return resultingFirstChild;
   }
