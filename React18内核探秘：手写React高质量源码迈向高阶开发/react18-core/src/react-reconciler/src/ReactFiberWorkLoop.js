@@ -1,4 +1,7 @@
-import { scheduleCallback } from "scheduler";
+import {
+  NormalPriority as NormalSchedulerPriority,
+  scheduleCallback as Scheduler_scheduleCallback,
+} from "./Scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
@@ -27,13 +30,12 @@ export function scheduleUpdateOnFiber(root) {
   ensureRootIsScheduled(root);
 }
 function ensureRootIsScheduled(root) {
-  scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
+  Scheduler_scheduleCallback(NormalSchedulerPriority, performConcurrentWorkOnRoot.bind(null, root));
 }
 function performConcurrentWorkOnRoot(root) {
   renderRootSync(root);
   const finishedWork = root.current.alternate;
   printFiber(finishedWork);
-  console.log(finishedWork);
   console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
   root.finishedWork = finishedWork;
   commitRoot(root);
@@ -53,7 +55,7 @@ function commitRoot(root) {
   ) {
     if (!rootDoesHavePassiveEffects) {
       rootDoesHavePassiveEffects = true;
-      scheduleCallback(flushPassiveEffects);
+      Scheduler_scheduleCallback(flushPassiveEffects);
     }
   }
   const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
@@ -67,9 +69,7 @@ function commitRoot(root) {
       rootWithPendingPassiveEffects = root;
     }
   }
-  root.current = finishedWork;
 }
-
 function printFiber(fiber) {
   /*
   fiber.flags &= ~Forked;
@@ -132,7 +132,6 @@ function getFlags(flags) {
   }
   return flags;
 }
-
 function prepareFreshStack(root) {
   workInProgress = createWorkInProgress(root.current, null);
   finishQueueingConcurrentUpdates();
