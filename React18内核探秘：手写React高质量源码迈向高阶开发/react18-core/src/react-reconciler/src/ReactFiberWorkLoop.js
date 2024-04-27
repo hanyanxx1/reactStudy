@@ -1,6 +1,9 @@
 import {
-  NormalPriority as NormalSchedulerPriority,
   scheduleCallback as Scheduler_scheduleCallback,
+  ImmediatePriority as ImmediateSchedulerPriority,
+  UserBlockingPriority as UserBlockingSchedulerPriority,
+  NormalPriority as NormalSchedulerPriority,
+  IdlePriority as IdleSchedulerPriority,
 } from "./Scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
@@ -21,25 +24,94 @@ import {
   Passive,
 } from "./ReactFiberFlags";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
+import {
+  NoLane,
+  NoLanes,
+  SyncLane,
+  getNextLanes,
+  getHighestPriorityLane,
+  markRootUpdated,
+  includesBlockingLane,
+} from "./ReactFiberLane";
+import {
+  getCurrentUpdatePriority,
+  lanesToEventPriority,
+  DiscreteEventPriority,
+  ContinuousEventPriority,
+  DefaultEventPriority,
+  IdleEventPriority,
+} from "./ReactEventPriorities";
+import { getCurrentEventPriority } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 
 let workInProgress = null;
 let rootDoesHavePassiveEffects = false;
 let rootWithPendingPassiveEffects = null;
+let workInProgressRootRenderLanes = NoLanes;
 
-export function scheduleUpdateOnFiber(root) {
+export function scheduleUpdateOnFiber(root, fiber, lane) {
+  markRootUpdated(root, lane);
   ensureRootIsScheduled(root);
 }
+
 function ensureRootIsScheduled(root) {
-  Scheduler_scheduleCallback(NormalSchedulerPriority, performConcurrentWorkOnRoot.bind(null, root));
+  const nextLanes = getNextLanes(root, NoLanes);
+  const newCallbackPriority = getHighestPriorityLane(nextLanes);
+  if (newCallbackPriority === SyncLane) {
+    // TODO
+    debugger;
+  } else {
+    let schedulerPriorityLevel;
+    switch (lanesToEventPriority(nextLanes)) {
+      case DiscreteEventPriority:
+        debugger;
+        schedulerPriorityLevel = ImmediateSchedulerPriority;
+        break;
+      case ContinuousEventPriority:
+        debugger;
+        schedulerPriorityLevel = UserBlockingSchedulerPriority;
+        break;
+      case DefaultEventPriority:
+        schedulerPriorityLevel = NormalSchedulerPriority;
+        break;
+      case IdleEventPriority:
+        debugger;
+        schedulerPriorityLevel = IdleSchedulerPriority;
+        break;
+      default:
+        debugger;
+        schedulerPriorityLevel = NormalSchedulerPriority;
+        break;
+    }
+    Scheduler_scheduleCallback(
+      schedulerPriorityLevel,
+      performConcurrentWorkOnRoot.bind(null, root)
+    );
+  }
 }
-function performConcurrentWorkOnRoot(root) {
-  renderRootSync(root);
+
+function performConcurrentWorkOnRoot(root, didTimeout) {
+  const lanes = getNextLanes(root, NoLanes);
+  if (lanes === NoLanes) {
+    return null;
+  }
+  const shouldTimeSlice = !includesBlockingLane(root, lanes) && !didTimeout;
+  if (shouldTimeSlice) {
+    debugger;
+    renderRootConcurrent(root, lanes);
+  } else {
+    renderRootSync(root, lanes);
+  }
   const finishedWork = root.current.alternate;
   printFiber(finishedWork);
   console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
   root.finishedWork = finishedWork;
   commitRoot(root);
 }
+
+function renderRootConcurrent(root, lanes) {
+  console.log(root, lanes);
+}
+
 export function flushPassiveEffects() {
   if (rootWithPendingPassiveEffects !== null) {
     const root = rootWithPendingPassiveEffects;
@@ -47,6 +119,7 @@ export function flushPassiveEffects() {
     commitPassiveMountEffects(root, root.current);
   }
 }
+
 function commitRoot(root) {
   const { finishedWork } = root;
   if (
@@ -70,6 +143,7 @@ function commitRoot(root) {
     }
   }
 }
+
 function printFiber(fiber) {
   /*
   fiber.flags &= ~Forked;
@@ -97,6 +171,7 @@ function printFiber(fiber) {
     child = child.sibling;
   }
 }
+
 function getTag(tag) {
   switch (tag) {
     case FunctionComponent:
@@ -111,6 +186,7 @@ function getTag(tag) {
       return tag;
   }
 }
+
 function getFlags(flags) {
   if (flags === (Update | Placement | ChildDeletion)) {
     return `自己移动和子元素有删除`;
@@ -132,12 +208,15 @@ function getFlags(flags) {
   }
   return flags;
 }
-function prepareFreshStack(root) {
+
+function prepareFreshStack(root, lanes) {
   workInProgress = createWorkInProgress(root.current, null);
+  workInProgressRootRenderLanes = lanes;
   finishQueueingConcurrentUpdates();
 }
-function renderRootSync(root) {
-  prepareFreshStack(root);
+
+function renderRootSync(root, lanes) {
+  prepareFreshStack(root, lanes);
   workLoopSync();
 }
 
@@ -149,7 +228,7 @@ function workLoopSync() {
 
 function performUnitOfWork(unitOfWork) {
   const current = unitOfWork.alternate;
-  const next = beginWork(current, unitOfWork);
+  const next = beginWork(current, unitOfWork, workInProgressRootRenderLanes);
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     completeUnitOfWork(unitOfWork);
@@ -172,4 +251,14 @@ function completeUnitOfWork(unitOfWork) {
     completedWork = returnFiber;
     workInProgress = completedWork;
   } while (completedWork !== null);
+}
+
+export function requestUpdateLane() {
+  const updateLane = getCurrentUpdatePriority();
+  if (updateLane !== NoLane) {
+    debugger;
+    return updateLane;
+  }
+  const eventLane = getCurrentEventPriority();
+  return eventLane;
 }

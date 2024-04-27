@@ -22,11 +22,18 @@ export function enqueueConcurrentHookUpdate(fiber, queue, update) {
   return getRootForUpdatedFiber(fiber);
 }
 
-function enqueueUpdate(fiber, queue, update) {
+export function enqueueConcurrentClassUpdate(fiber, queue, update, lane) {
+  enqueueUpdate(fiber, queue, update, lane);
+  return getRootForUpdatedFiber(fiber);
+}
+
+function enqueueUpdate(fiber, queue, update, lane) {
   concurrentQueues[concurrentQueuesIndex++] = fiber;
   concurrentQueues[concurrentQueuesIndex++] = queue;
   concurrentQueues[concurrentQueuesIndex++] = update;
+  concurrentQueues[concurrentQueuesIndex++] = lane;
 }
+
 function getRootForUpdatedFiber(sourceFiber) {
   let node = sourceFiber;
   let parent = node.return;
@@ -36,6 +43,7 @@ function getRootForUpdatedFiber(sourceFiber) {
   }
   return node.tag === HostRoot ? node.stateNode : null;
 }
+
 export function finishQueueingConcurrentUpdates(fiber, queue, update) {
   const endIndex = concurrentQueuesIndex;
   concurrentQueuesIndex = 0;
@@ -44,6 +52,7 @@ export function finishQueueingConcurrentUpdates(fiber, queue, update) {
     const fiber = concurrentQueues[i++];
     const queue = concurrentQueues[i++];
     const update = concurrentQueues[i++];
+    const lane = concurrentQueues[i++];
     if (queue !== null && update !== null) {
       const pending = queue.pending;
       if (pending === null) {

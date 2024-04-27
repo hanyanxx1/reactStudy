@@ -5,10 +5,10 @@ import {
   IndeterminateComponent,
   FunctionComponent,
 } from "./ReactWorkTags";
-import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
+import { processUpdateQueue, cloneUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-import logger, { indent } from "shared/logger";
+import logger from "shared/logger";
 import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
 
 function reconcileChildren(current, workInProgress, nextChildren) {
@@ -19,8 +19,10 @@ function reconcileChildren(current, workInProgress, nextChildren) {
   }
 }
 
-function updateHostRoot(current, workInProgress) {
-  processUpdateQueue(workInProgress);
+function updateHostRoot(current, workInProgress, renderLanes) {
+  const nextProps = workInProgress.pendingProps;
+  cloneUpdateQueue(current, workInProgress);
+  processUpdateQueue(workInProgress, nextProps, renderLanes);
   const nextState = workInProgress.memoizedState;
   const nextChildren = nextState.element;
   reconcileChildren(current, workInProgress, nextChildren);
@@ -38,7 +40,6 @@ function updateHostComponent(current, workInProgress) {
   reconcileChildren(current, workInProgress, nextChildren);
   return workInProgress.child;
 }
-
 function mountIndeterminateComponent(_current, workInProgress, Component) {
   const props = workInProgress.pendingProps;
   const value = renderWithHooks(null, workInProgress, Component, props);
@@ -46,28 +47,32 @@ function mountIndeterminateComponent(_current, workInProgress, Component) {
   reconcileChildren(null, workInProgress, value);
   return workInProgress.child;
 }
-
 function updateFunctionComponent(current, workInProgress, Component, nextProps) {
   const nextChildren = renderWithHooks(current, workInProgress, Component, nextProps);
   reconcileChildren(current, workInProgress, nextChildren);
   return workInProgress.child;
 }
-
-export function beginWork(current, workInProgress) {
-  logger(" ".repeat(indent.number) + "beginWork", workInProgress);
+export function beginWork(current, workInProgress, renderLanes) {
+  logger("beginWork", workInProgress);
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
-      return mountIndeterminateComponent(current, workInProgress, workInProgress.type);
+      return mountIndeterminateComponent(current, workInProgress, workInProgress.type, renderLanes);
     }
     case FunctionComponent: {
       const Component = workInProgress.type;
       const resolvedProps = workInProgress.pendingProps;
-      return updateFunctionComponent(current, workInProgress, Component, resolvedProps);
+      return updateFunctionComponent(
+        current,
+        workInProgress,
+        Component,
+        resolvedProps,
+        renderLanes
+      );
     }
     case HostRoot:
-      return updateHostRoot(current, workInProgress);
+      return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
-      return updateHostComponent(current, workInProgress);
+      return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
     default:
       return null;
