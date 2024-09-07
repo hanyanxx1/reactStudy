@@ -1,0 +1,31 @@
+{
+	"name": "zhufengzustand",
+	"version": "1.2.0",
+	"description": "The base template for Create React App.",
+	"license": "MIT",
+	"dependencies": {
+		"immer": "^9.0.19",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-scripts": "^5.0.1",
+		"zustand": "^4.3.3"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
+}
