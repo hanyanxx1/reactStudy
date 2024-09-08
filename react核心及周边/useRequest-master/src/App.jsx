@@ -10,14 +10,14 @@ function getName(userId) {
       } else {
         reject(new Error("获取用户名失败"));
       }
-      success = !success;
+      // success = !success;
     }, 1000);
   });
 }
 const initialUserId = "1";
 function App() {
   const [userId, setUserId] = useState(initialUserId);
-  const { data, loading, error, run } = useRequest(getName, {
+  const { data, loading, error, run, runAsync, refresh, refreshAsync } = useRequest(getName, {
     manual: true,
     defaultParams: [initialUserId],
     onBefore: (params) => {
@@ -54,6 +54,8 @@ function App() {
       <button onClick={() => run(userId)} disabled={loading}>
         {loading ? "获取中..." : "run"}
       </button>
+      <button onClick={refresh}>refresh</button>
+      <button onClick={refreshAsync}>refreshAsync</button>
       <div>用户名:{data}</div>
     </>
   );
