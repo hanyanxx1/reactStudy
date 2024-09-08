@@ -11,11 +11,16 @@ class Fetch {
   };
   runAsync = async (...params) => {
     this.setState({ loading: true, params });
+    this.options.onBefore?.(params);
     try {
       const res = await this.serviceRef.current(...params);
       this.setState({ loading: false, data: res, error: undefined, params });
+      this.options.onSuccess?.(res, params);
+      this.options.onFinally?.(params, res, undefined);
     } catch (error) {
       this.setState({ loading: false, data: undefined, error: error, params });
+      this.options.onError?.(error, params);
+      this.options.onFinally?.(params, undefined, error);
       throw error;
     }
   };
