@@ -9,18 +9,18 @@ class Fetch {
     this.state = { ...this.state, ...s };
     this.subscribe();
   };
-  runAsync = async () => {
-    this.setState({ loading: true });
+  runAsync = async (...params) => {
+    this.setState({ loading: true, params });
     try {
-      const res = await this.serviceRef.current();
-      this.setState({ loading: false, data: res, error: undefined });
+      const res = await this.serviceRef.current(...params);
+      this.setState({ loading: false, data: res, error: undefined, params });
     } catch (error) {
-      this.setState({ loading: false, data: undefined, error: error });
+      this.setState({ loading: false, data: undefined, error: error, params });
       throw error;
     }
   };
-  run = () => {
-    this.runAsync().catch((error) => {
+  run = (...params) => {
+    this.runAsync(...params).catch((error) => {
       if (!this.options.onError) {
         console.error(error);
       }

@@ -15,7 +15,9 @@ function useRequestImplement(service, options) {
   }, []);
   useMount(() => {
     if (!manual) {
-      fetchInstance.run();
+      const params = fetchInstance.state.params || options.defaultParams || [];
+      console.log(fetchInstance.state.params);
+      fetchInstance.run(...params);
     }
   });
   return {
