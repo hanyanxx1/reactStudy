@@ -2,7 +2,7 @@ class Fetch {
   constructor(serviceRef, subscribe) {
     this.serviceRef = serviceRef;
     this.subscribe = subscribe;
-    this.state = { loading: false, data: undefined };
+    this.state = { loading: false, data: undefined, error: undefined };
   }
   setState = (s = {}) => {
     this.state = { ...this.state, ...s };
@@ -10,8 +10,12 @@ class Fetch {
   };
   runAsync = async () => {
     this.setState({ loading: true });
-    const res = await this.serviceRef.current();
-    this.setState({ loading: false, data: res });
+    try {
+      const res = await this.serviceRef.current();
+      this.setState({ loading: false, data: res, error: undefined });
+    } catch (error) {
+      this.setState({ loading: false, data: undefined, error: error });
+    }
   };
   run = () => {
     this.runAsync();

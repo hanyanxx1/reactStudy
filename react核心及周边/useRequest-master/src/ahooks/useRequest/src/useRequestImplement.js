@@ -16,6 +16,7 @@ function useRequestImplement(service) {
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
+    error: fetchInstance.state.error,
   };
 }
 
