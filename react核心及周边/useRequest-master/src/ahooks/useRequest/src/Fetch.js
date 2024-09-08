@@ -1,6 +1,7 @@
 class Fetch {
-  constructor(serviceRef, subscribe) {
+  constructor(serviceRef, options, subscribe) {
     this.serviceRef = serviceRef;
+    this.options = options;
     this.subscribe = subscribe;
     this.state = { loading: false, data: undefined, error: undefined };
   }
@@ -15,10 +16,15 @@ class Fetch {
       this.setState({ loading: false, data: res, error: undefined });
     } catch (error) {
       this.setState({ loading: false, data: undefined, error: error });
+      throw error;
     }
   };
   run = () => {
-    this.runAsync();
+    this.runAsync().catch((error) => {
+      if (!this.options.onError) {
+        console.error(error);
+      }
+    });
   };
 }
 export default Fetch;

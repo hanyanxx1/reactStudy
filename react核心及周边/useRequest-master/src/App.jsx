@@ -11,7 +11,9 @@ function getName() {
 }
 
 function App() {
-  const { data, loading, error } = useRequest(getName);
+  const { data, loading, error, run, runAsync } = useRequest(getName, {
+    manual: true,
+  });
 
   if (loading) {
     return <>加载中....</>;
@@ -21,7 +23,17 @@ function App() {
     return <div>{error.message}</div>;
   }
 
-  return <div>用户名:{data}</div>;
+  return (
+    <>
+      <button onClick={run} disabled={loading}>
+        {loading ? "获取中..." : "run"}
+      </button>
+      <button onClick={runAsync} disabled={loading}>
+        {loading ? "获取中..." : "runAsync"}
+      </button>
+      <div>用户名:{data}</div>
+    </>
+  );
 }
 
 export default App;
