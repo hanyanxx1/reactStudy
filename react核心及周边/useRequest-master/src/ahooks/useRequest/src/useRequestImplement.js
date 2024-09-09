@@ -5,8 +5,8 @@ import useMount from "../../useMount";
 import useMemoizedFn from "../../useMemoizedFn";
 import Fetch from "./Fetch";
 
-function useRequestImplement(service, options) {
-  const { manual, ...rest } = options;
+function useRequestImplement(service, options = {}) {
+  const { manual = false, ...rest } = options;
   const fetchOptions = { manual, ...rest };
   const serviceRef = useLatest(service);
   const update = useUpdate();
@@ -27,6 +27,7 @@ function useRequestImplement(service, options) {
     runAsync: useMemoizedFn(fetchInstance.runAsync.bind(fetchInstance)),
     refresh: useMemoizedFn(fetchInstance.refresh.bind(fetchInstance)),
     refreshAsync: useMemoizedFn(fetchInstance.refreshAsync.bind(fetchInstance)),
+    mutate: useMemoizedFn(fetchInstance.mutate.bind(fetchInstance)),
   };
 }
 

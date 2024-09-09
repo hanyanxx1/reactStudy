@@ -1,62 +1,66 @@
-// import { useRequest } from "ahooks";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRequest } from "./ahooks";
+// import { useRequest } from "ahooks";
 let success = true;
-function getName(userId) {
+function getName() {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (success) {
-        resolve(`name${userId}`);
+        resolve(`zhufeng`);
       } else {
         reject(new Error("获取用户名失败"));
       }
-      // success = !success;
+      success = !success;
     }, 1000);
   });
 }
-const initialUserId = "1";
+let updateSuccess = true;
+function updateName(username) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (updateSuccess) {
+        resolve(username);
+      } else {
+        reject(new Error(`修改用户名失败`));
+      }
+      updateSuccess = !updateSuccess;
+    }, 1000);
+  });
+}
 function App() {
-  const [userId, setUserId] = useState(initialUserId);
-  const { data, loading, error, run, runAsync, refresh, refreshAsync } = useRequest(getName, {
+  const lastRef = useRef();
+  const [value, setValue] = useState("");
+  const { data: name, mutate } = useRequest(getName);
+  const { run, loading } = useRequest(updateName, {
     manual: true,
-    defaultParams: [initialUserId],
-    onBefore: (params) => {
-      console.info(`开始请求: ${params[0]}`);
-    },
     onSuccess: (result, params) => {
-      console.info(`请求成功:获取${params[0]}对应的用户名成功:${result}"!`);
+      setValue("");
+      console.log(`用户名成功变更为 "${params[0]}" !`);
     },
-    onError: (error) => {
-      console.error(`请求失败:${error.message}"!`);
-    },
-    onFinally: (params, result, error) => {
-      console.info(`请求完成`);
+    onError: (error, params) => {
+      console.error(error.message);
+      mutate(lastRef.current);
     },
   });
 
-  if (loading) {
-    return <>加载中....</>;
-  }
-
-  if (error) {
-    return <div>{error.message}</div>;
-  }
-
   return (
     <>
+      {name && <div>用户名: {name}</div>}
       <input
-        onChange={(event) => {
-          setUserId(event.target.value);
-        }}
-        value={userId}
-        placeholder="请输入用户ID"
+        onChange={(event) => setValue(event.target.value)}
+        value={value}
+        placeholder="请输入用户名"
       />
-      <button onClick={() => run(userId)} disabled={loading}>
-        {loading ? "获取中..." : "run"}
+      <button
+        onClick={() => {
+          lastRef.current = name;
+          mutate(value);
+          run(value);
+        }}
+        type="button"
+      >
+        {loading ? "更新中......." : "更新"}
       </button>
-      <button onClick={refresh}>refresh</button>
-      <button onClick={refreshAsync}>refreshAsync</button>
-      <div>用户名:{data}</div>
     </>
   );
 }
