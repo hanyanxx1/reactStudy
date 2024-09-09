@@ -24,14 +24,14 @@ function updateName(username) {
         reject(new Error(`修改用户名失败`));
       }
       updateSuccess = !updateSuccess;
-    }, 1000);
+    }, 3000);
   });
 }
 function App() {
   const lastRef = useRef();
   const [value, setValue] = useState("");
   const { data: name, mutate } = useRequest(getName);
-  const { run, loading } = useRequest(updateName, {
+  const { run, loading, cancel } = useRequest(updateName, {
     manual: true,
     onSuccess: (result, params) => {
       setValue("");
@@ -39,6 +39,9 @@ function App() {
     },
     onError: (error, params) => {
       console.error(error.message);
+      mutate(lastRef.current);
+    },
+    onCancel: () => {
       mutate(lastRef.current);
     },
   });
@@ -60,6 +63,9 @@ function App() {
         type="button"
       >
         {loading ? "更新中......." : "更新"}
+      </button>
+      <button type="button" onClick={cancel}>
+        取消
       </button>
     </>
   );

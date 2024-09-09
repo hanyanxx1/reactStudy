@@ -4,6 +4,7 @@ import useCreation from "../../useCreation";
 import useMount from "../../useMount";
 import useMemoizedFn from "../../useMemoizedFn";
 import Fetch from "./Fetch";
+import useUnmount from "../../useUnmount";
 
 function useRequestImplement(service, options = {}) {
   const { manual = false, ...rest } = options;
@@ -19,6 +20,9 @@ function useRequestImplement(service, options = {}) {
       fetchInstance.run(...params);
     }
   });
+  useUnmount(() => {
+    fetchInstance.cancel();
+  });
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
@@ -28,6 +32,7 @@ function useRequestImplement(service, options = {}) {
     refresh: useMemoizedFn(fetchInstance.refresh.bind(fetchInstance)),
     refreshAsync: useMemoizedFn(fetchInstance.refreshAsync.bind(fetchInstance)),
     mutate: useMemoizedFn(fetchInstance.mutate.bind(fetchInstance)),
+    cancel: useMemoizedFn(fetchInstance.cancel.bind(fetchInstance)),
   };
 }
 
