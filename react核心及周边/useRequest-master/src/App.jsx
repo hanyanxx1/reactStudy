@@ -32,6 +32,7 @@ function App() {
     manual: true,
     name: "updateName",
     loadingDelay: 1000,
+    pollingWhenHidden: false,
     onSuccess: (result, params) => {
       setValue("");
       console.log(`用户名成功变更为 "${params[0]}" !`);

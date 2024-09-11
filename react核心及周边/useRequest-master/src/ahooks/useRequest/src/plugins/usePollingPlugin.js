@@ -1,12 +1,17 @@
 import { useUpdateEffect } from "ahooks";
 import { useRef } from "react";
+import isDocumentVisible from "../utils/isDocumentVisible";
+import subscribeReVisible from "../utils/subscribeReVisible";
 
-const usePollingPlugin = (fetchInstance, { pollingInterval }) => {
+const usePollingPlugin = (fetchInstance, { pollingInterval, pollingWhenHidden = true }) => {
   const timeRef = useRef();
+  const unsubscribeRef = useRef();
+
   const stopPolling = () => {
     if (timeRef.current) {
       clearTimeout(timeRef.current);
     }
+    unsubscribeRef.current?.();
   };
 
   useUpdateEffect(() => {
@@ -24,6 +29,12 @@ const usePollingPlugin = (fetchInstance, { pollingInterval }) => {
       stopPolling();
     },
     onFinally() {
+      if (!pollingWhenHidden && !isDocumentVisible()) {
+        subscribeReVisible(() => {
+          fetchInstance.refresh();
+        });
+        return;
+      }
       timeRef.current = setTimeout(() => {
         fetchInstance.refresh();
       }, pollingInterval);
