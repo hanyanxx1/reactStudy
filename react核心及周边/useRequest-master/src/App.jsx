@@ -1,17 +1,11 @@
 import { useState, useRef } from "react";
 import { useRequest } from "./ahooks";
-// import { useRequest } from "ahooks";
-let success = true;
+let counter = 0;
 function getName() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      if (success) {
-        resolve(`zhufeng`);
-      } else {
-        reject(new Error("获取用户名失败"));
-      }
-      success = !success;
-    }, 1000);
+      resolve(`zhufeng` + ++counter);
+    }, 0);
   });
 }
 let updateSuccess = true;
@@ -30,7 +24,10 @@ function updateName(username) {
 function App() {
   const lastRef = useRef();
   const [value, setValue] = useState("");
-  const { data: name, mutate } = useRequest(getName, { name: "getName" });
+  const { data: name, mutate } = useRequest(getName, {
+    name: "getName",
+    pollingInterval: 1000,
+  });
   const { run, loading, cancel } = useRequest(updateName, {
     manual: true,
     name: "updateName",
@@ -47,7 +44,7 @@ function App() {
       mutate(lastRef.current);
     },
   });
-
+  console.log(loading);
   return (
     <>
       {name && <div>用户名: {name}</div>}
