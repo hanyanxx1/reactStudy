@@ -6,7 +6,7 @@ const useLoggerPlugin = (fetchInstance, { name }) => {
     },
     onRequest: (...rest) => {
       console.log(name, "onRequest", rest);
-      return { servicePromise: Promise.resolve("onRequest返回值") };
+      // return { servicePromise: Promise.resolve("onRequest返回值") };
     },
     onSuccess: (...rest) => {
       console.log(name, "onSuccess", fetchInstance.state.name, fetchInstance.state.id, rest);

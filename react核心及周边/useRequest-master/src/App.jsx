@@ -34,6 +34,7 @@ function App() {
   const { run, loading, cancel } = useRequest(updateName, {
     manual: true,
     name: "updateName",
+    loadingDelay: 1000,
     onSuccess: (result, params) => {
       setValue("");
       console.log(`用户名成功变更为 "${params[0]}" !`);
