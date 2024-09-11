@@ -6,14 +6,16 @@ import useMemoizedFn from "../../useMemoizedFn";
 import Fetch from "./Fetch";
 import useUnmount from "../../useUnmount";
 
-function useRequestImplement(service, options = {}) {
+function useRequestImplement(service, options = {}, plugins = []) {
   const { manual = false, ...rest } = options;
   const fetchOptions = { manual, ...rest };
   const serviceRef = useLatest(service);
   const update = useUpdate();
   const fetchInstance = useCreation(() => {
-    return new Fetch(serviceRef, fetchOptions, update);
+    const initState = plugins.map((p) => p?.onInit?.(fetchOptions)).filter(Boolean);
+    return new Fetch(serviceRef, fetchOptions, update, Object.assign({}, ...initState));
   }, []);
+  fetchInstance.pluginImpls = plugins.map((p) => p(fetchInstance, fetchOptions));
   useMount(() => {
     if (!manual) {
       const params = fetchInstance.state.params || options.defaultParams || [];

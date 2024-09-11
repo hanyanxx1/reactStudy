@@ -30,9 +30,10 @@ function updateName(username) {
 function App() {
   const lastRef = useRef();
   const [value, setValue] = useState("");
-  const { data: name, mutate } = useRequest(getName);
+  const { data: name, mutate } = useRequest(getName, { name: "getName" });
   const { run, loading, cancel } = useRequest(updateName, {
     manual: true,
+    name: "updateName",
     onSuccess: (result, params) => {
       setValue("");
       console.log(`用户名成功变更为 "${params[0]}" !`);

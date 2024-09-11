@@ -1,11 +1,17 @@
 import { isFunction } from "../../utils";
 class Fetch {
   count = 0;
-  constructor(serviceRef, options, subscribe) {
+  constructor(serviceRef, options, subscribe, initialState = {}) {
     this.serviceRef = serviceRef;
     this.options = options;
     this.subscribe = subscribe;
-    this.state = { loading: false, data: undefined, error: undefined };
+    this.state = {
+      loading: !options.manual,
+      data: undefined,
+      error: undefined,
+      params: undefined,
+      ...initialState,
+    };
   }
   setState = (s = {}) => {
     this.state = { ...this.state, ...s };
@@ -14,23 +20,36 @@ class Fetch {
   runAsync = async (...params) => {
     this.count += 1;
     const currentCount = this.count;
-    this.setState({ loading: true, params });
+    const { ...state } = this.runPluginHandler("onBefore", params);
+    this.setState({ loading: true, params, ...state });
     this.options.onBefore?.(params);
     try {
-      const res = await this.serviceRef.current(...params);
+      let { servicePromise } = this.runPluginHandler("onRequest", this.serviceRef.current, params);
+      if (!servicePromise) {
+        servicePromise = this.serviceRef.current(...params);
+      }
+      const res = await servicePromise;
       if (currentCount !== this.count) {
         return new Promise(() => {});
       }
       this.setState({ loading: false, data: res, error: undefined, params });
       this.options.onSuccess?.(res, params);
+      this.runPluginHandler("onSuccess", res, params);
       this.options.onFinally?.(params, res, undefined);
+      if (currentCount === this.count) {
+        this.runPluginHandler("onFinally", params, res, undefined);
+      }
     } catch (error) {
       if (currentCount !== this.count) {
         return new Promise(() => {});
       }
       this.setState({ loading: false, data: undefined, error: error, params });
       this.options.onError?.(error, params);
+      this.runPluginHandler("onError", error, params);
       this.options.onFinally?.(params, undefined, error);
+      if (currentCount === this.count) {
+        this.runPluginHandler("onFinally", params, undefined, error);
+      }
       throw error;
     }
   };
@@ -54,12 +73,18 @@ class Fetch {
     } else {
       targetData = data;
     }
+    this.runPluginHandler("onMutate", targetData);
     this.setState({ data: targetData });
   }
   cancel() {
     this.count += 1;
     this.setState({ loading: false });
     this.options.onCancel?.();
+    this.runPluginHandler("onCancel");
+  }
+  runPluginHandler(event, ...rest) {
+    const r = this.pluginImpls.map((i) => i[event]?.(...rest)).filter(Boolean);
+    return Object.assign({}, ...r);
   }
 }
 export default Fetch;
