@@ -20,7 +20,10 @@ class Fetch {
   runAsync = async (...params) => {
     this.count += 1;
     const currentCount = this.count;
-    const { ...state } = this.runPluginHandler("onBefore", params);
+    const { stopNow = false, ...state } = this.runPluginHandler("onBefore", params);
+    if (stopNow) {
+      return new Promise(() => {});
+    }
     this.setState({ loading: true, params, ...state });
     this.options.onBefore?.(params);
     try {
