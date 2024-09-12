@@ -1,7 +1,10 @@
-import { useUpdateEffect } from "ahooks";
 import { useRef } from "react";
+import useUpdateEffect from "../../../useUpdateEffect";
 
-const useAutoRunPlugin = (fetchInstance, { manual, ready = true, defaultParams = [] }) => {
+const useAutoRunPlugin = (
+  fetchInstance,
+  { manual, ready = true, defaultParams = [], refreshDeps = [], refreshDepsAction }
+) => {
   const hasAutoRun = useRef(false);
   hasAutoRun.current = false;
   useUpdateEffect(() => {
@@ -10,6 +13,19 @@ const useAutoRunPlugin = (fetchInstance, { manual, ready = true, defaultParams =
       fetchInstance.run(...defaultParams);
     }
   }, [ready]);
+  useUpdateEffect(() => {
+    if (hasAutoRun.current) {
+      return;
+    }
+    if (!manual) {
+      hasAutoRun.current = true;
+      if (refreshDepsAction) {
+        refreshDepsAction();
+      } else {
+        fetchInstance.refresh();
+      }
+    }
+  }, [...refreshDeps]);
   return {
     onBefore: () => {
       if (!ready) {
