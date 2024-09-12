@@ -11,10 +11,8 @@ function getName() {
 function App() {
   const [userId, setUserId] = useState("1");
   const { data: name, loading } = useRequest(getName, {
-    refreshDeps: [userId],
-    refreshDepsAction() {
-      console.log("refreshDepsAction");
-    },
+    refreshOnWindowFocus: true,
+    focusTimespan: 5000,
   });
   return (
     <>
