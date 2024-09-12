@@ -9,7 +9,12 @@ function getName() {
 }
 function App() {
   const [ready, setReady] = useState(false);
-  const { data: name, loading } = useRequest(getName, {
+  const {
+    data: name,
+    loading,
+    run,
+  } = useRequest(getName, {
+    manual: true,
     ready,
   });
   return (
@@ -18,6 +23,9 @@ function App() {
         Ready: {JSON.stringify(ready)}
         <button onClick={() => setReady(!ready)}>切换Ready</button>
       </p>
+      <button type="button" onClick={run}>
+        run
+      </button>
       {loading ? "加载中" : name ? <div>用户名: {name}</div> : null}
     </>
   );
