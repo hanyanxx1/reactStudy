@@ -13,8 +13,7 @@ function App() {
     loading,
     run,
   } = useRequest(getName, {
-    manual: true,
-    debounceWait: 1000,
+    throttleWait: 1000,
   });
   return (
     <>
