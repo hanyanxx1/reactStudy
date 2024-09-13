@@ -1,22 +1,24 @@
-import { useState } from "react";
+// import { useRequest } from "ahooks";
 import { useRequest } from "./ahooks";
-let counter = 0;
-function getName() {
+function getName(suffix) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(`zhufeng` + ++counter);
-    }, 1000);
+      resolve(`zhufeng` + suffix);
+    }, 300);
   });
 }
 function App() {
-  const [userId, setUserId] = useState("1");
-  const { data: name, loading } = useRequest(getName, {
-    refreshOnWindowFocus: true,
-    focusTimespan: 5000,
+  const {
+    data: name,
+    loading,
+    run,
+  } = useRequest(getName, {
+    manual: true,
+    debounceWait: 1000,
   });
   return (
     <>
-      <input value={userId} onChange={(event) => setUserId(event.target.value)} />
+      <input onChange={(e) => run(e.target.value)} />
       {loading ? "加载中" : name ? <div>用户名: {name}</div> : null}
     </>
   );
