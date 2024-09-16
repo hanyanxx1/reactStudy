@@ -15,6 +15,8 @@ function User() {
   const { data, loading, params, run } = useRequest(getName, {
     cacheKey: "cacheKey",
     staleTime: 5000,
+    setCache: (data) => localStorage.setItem("cacheKey", JSON.stringify(data)),
+    getCache: () => JSON.parse(localStorage.getItem("cacheKey") || "{}"),
   });
   const [keyword, setKeyword] = useState(params[0] || "");
   if (!data && loading) {

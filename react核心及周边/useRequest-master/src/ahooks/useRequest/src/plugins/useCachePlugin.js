@@ -1,12 +1,22 @@
 import useCreation from "../../../useCreation";
 import * as cache from "../utils/cache";
 
-const useCachePlugin = (fetchInstance, { cacheKey, staleTime = 0 }) => {
+const useCachePlugin = (
+  fetchInstance,
+  { cacheKey, staleTime = 0, setCache: customSetCache, getCache: customGetCache }
+) => {
   const _setCache = (key, cachedData) => {
-    cache.setCache(key, cachedData);
+    if (customSetCache) {
+      customSetCache(key, cachedData);
+    } else {
+      cache.setCache(key, cachedData);
+    }
   };
 
   const _getCache = (key) => {
+    if (customGetCache) {
+      return customGetCache(key);
+    }
     return cache.getCache(key);
   };
 
