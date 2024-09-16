@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRequest } from "./ahooks";
+import { useRequest, clearCache } from "./ahooks";
 let counter = 0;
 function getName(keyword = "") {
   return new Promise((resolve) => {
@@ -14,7 +14,7 @@ function getName(keyword = "") {
 function User() {
   const { data, loading, params, run } = useRequest(getName, {
     cacheKey: "cacheKey",
-    staleTime: 0,
+    staleTime: 5000,
   });
   const [keyword, setKeyword] = useState(params[0] || "");
   if (!data && loading) {
@@ -32,6 +32,7 @@ function User() {
           获取用户名
         </button>
       </div>
+      <button onClick={() => clearCache("cacheKey")}>清除缓存</button>
       <p>后台加载中: {loading ? "true" : "false"}</p>
       <p>最近的请求时间: {data?.time}</p>
       <p>Keyword: {keyword}</p>

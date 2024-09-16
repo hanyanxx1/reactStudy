@@ -10,4 +10,13 @@ const getCache = (key) => {
   return cache.get(key);
 };
 
-export { getCache, setCache };
+const clearCache = (key) => {
+  if (key) {
+    const cacheKeys = Array.isArray(key) ? key : [key];
+    cacheKeys.forEach((cacheKey) => cache.delete(cacheKey));
+  } else {
+    cache.clear();
+  }
+};
+
+export { getCache, setCache, clearCache };

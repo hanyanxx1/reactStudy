@@ -1,2 +1,2 @@
-import useRequest from "./useRequest";
-export { useRequest };
+import useRequest, { clearCache } from "./useRequest";
+export { useRequest, clearCache };
