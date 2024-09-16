@@ -1,6 +1,6 @@
 import * as cache from "../utils/cache";
 
-const useCachePlugin = (fetchInstance, { cacheKey }) => {
+const useCachePlugin = (fetchInstance, { cacheKey, staleTime = 0 }) => {
   const _setCache = (key, cachedData) => {
     cache.setCache(key, cachedData);
   };
@@ -19,9 +19,17 @@ const useCachePlugin = (fetchInstance, { cacheKey }) => {
       if (!cacheData || !Object.hasOwnProperty.call(cacheData, "data")) {
         return {};
       }
-      return {
-        data: cacheData?.data,
-      };
+      if (staleTime === -1 || new Date().getTime() - cacheData.time <= staleTime) {
+        return {
+          loading: false,
+          data: cacheData?.data,
+          returnNow: true,
+        };
+      } else {
+        return {
+          data: cacheData?.data,
+        };
+      }
     },
     onSuccess: (data, params) => {
       if (cacheKey) {

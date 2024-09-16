@@ -14,6 +14,7 @@ function getName() {
 function User() {
   const { data, loading } = useRequest(getName, {
     cacheKey: "cacheKey",
+    staleTime: 5000,
   });
   if (!data && loading) {
     return <p>加载中...</p>;
