@@ -1,3 +1,4 @@
+import useCreation from "../../../useCreation";
 import * as cache from "../utils/cache";
 
 const useCachePlugin = (fetchInstance, { cacheKey, staleTime = 0 }) => {
@@ -8,6 +9,20 @@ const useCachePlugin = (fetchInstance, { cacheKey, staleTime = 0 }) => {
   const _getCache = (key) => {
     return cache.getCache(key);
   };
+
+  useCreation(() => {
+    if (!cacheKey) {
+      return;
+    }
+    const cacheData = _getCache(cacheKey);
+    if (cacheData && Object.hasOwnProperty.call(cacheData, "data")) {
+      fetchInstance.state.data = cacheData.data;
+      fetchInstance.state.params = cacheData.params;
+      if (staleTime === -1 || new Date().getTime() - cacheData.time <= staleTime) {
+        fetchInstance.state.loading = false;
+      }
+    }
+  });
 
   if (!cacheKey) {
     return {};

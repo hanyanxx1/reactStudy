@@ -28,6 +28,7 @@ function useRequestImplement(service, options = {}, plugins = []) {
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
+    params: fetchInstance.state.params || [],
     error: fetchInstance.state.error,
     run: useMemoizedFn(fetchInstance.run.bind(fetchInstance)),
     runAsync: useMemoizedFn(fetchInstance.runAsync.bind(fetchInstance)),

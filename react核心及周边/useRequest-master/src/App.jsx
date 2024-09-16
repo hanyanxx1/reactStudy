@@ -1,28 +1,40 @@
 import { useState } from "react";
 import { useRequest } from "./ahooks";
 let counter = 0;
-function getName() {
+function getName(keyword = "") {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         time: new Date().toLocaleTimeString(),
-        data: `zhufeng` + ++counter,
+        data: keyword + ++counter,
       });
     }, 2000);
   });
 }
 function User() {
-  const { data, loading } = useRequest(getName, {
+  const { data, loading, params, run } = useRequest(getName, {
     cacheKey: "cacheKey",
-    staleTime: 5000,
+    staleTime: 0,
   });
+  const [keyword, setKeyword] = useState(params[0] || "");
   if (!data && loading) {
     return <p>加载中...</p>;
   }
   return (
     <>
+      <div>
+        <input value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+        <button
+          onClick={() => {
+            run(keyword);
+          }}
+        >
+          获取用户名
+        </button>
+      </div>
       <p>后台加载中: {loading ? "true" : "false"}</p>
       <p>最近的请求时间: {data?.time}</p>
+      <p>Keyword: {keyword}</p>
       <p>{data?.data}</p>
     </>
   );
