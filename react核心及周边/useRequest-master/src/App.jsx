@@ -1,25 +1,40 @@
+import { useState } from "react";
 import { useRequest } from "./ahooks";
+let counter = 0;
 function getName() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      reject(new Error("获取用户名失败"));
+      resolve({
+        time: new Date().toLocaleTimeString(),
+        data: `zhufeng` + ++counter,
+      });
     }, 2000);
   });
 }
-function App() {
-  const {
-    data: name,
-    loading,
-    run,
-  } = useRequest(getName, {
-    retryCount: 3,
-    retryInterval: 1000,
+function User() {
+  const { data, loading } = useRequest(getName, {
+    cacheKey: "cacheKey",
   });
+  if (!data && loading) {
+    return <p>加载中...</p>;
+  }
   return (
     <>
-      <input onChange={(e) => run(e.target.value)} />
-      {loading ? "加载中" : name ? <div>用户名: {name}</div> : null}
+      <p>后台加载中: {loading ? "true" : "false"}</p>
+      <p>最近的请求时间: {data?.time}</p>
+      <p>{data?.data}</p>
     </>
+  );
+}
+function App() {
+  const [visible, setVisible] = useState(true);
+  return (
+    <div>
+      <button type="button" onClick={() => setVisible(!visible)}>
+        {visible ? "隐藏" : "显示"}
+      </button>
+      {visible && <User />}
+    </div>
   );
 }
 export default App;

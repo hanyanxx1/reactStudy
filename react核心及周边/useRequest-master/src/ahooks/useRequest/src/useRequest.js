@@ -7,6 +7,7 @@ import useRefreshOnWindowFocusPlugin from "./plugins/useRefreshOnWindowFocusPlug
 import useDebouncePlugin from "./plugins/useDebouncePlugin";
 import useThrottlePlugin from "./plugins/useThrottlePlugin";
 import useRetryPlugin from "./plugins/useRetryPlugin";
+import useCachePlugin from "./plugins/useCachePlugin";
 
 function useRequest(service, options = {}, plugins) {
   return useRequestImplement(service, options, [
@@ -19,6 +20,7 @@ function useRequest(service, options = {}, plugins) {
     useDebouncePlugin,
     useThrottlePlugin,
     useRetryPlugin,
+    useCachePlugin,
   ]);
 }
 
