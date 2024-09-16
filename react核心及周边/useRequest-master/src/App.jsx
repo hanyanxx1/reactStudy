@@ -1,10 +1,9 @@
-// import { useRequest } from "ahooks";
 import { useRequest } from "./ahooks";
-function getName(suffix) {
-  return new Promise((resolve) => {
+function getName() {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(`zhufeng` + suffix);
-    }, 300);
+      reject(new Error("获取用户名失败"));
+    }, 2000);
   });
 }
 function App() {
@@ -13,7 +12,8 @@ function App() {
     loading,
     run,
   } = useRequest(getName, {
-    throttleWait: 1000,
+    retryCount: 3,
+    retryInterval: 1000,
   });
   return (
     <>
