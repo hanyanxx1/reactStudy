@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #root {
+        border: 1px solid red;
+        padding: 10px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      var historyObj = window.history;
+      function updateContent(pathname) {
+        root.innerHTML = pathname;
+      }
+      window.addEventListener("popstate", (event) => {
+        console.log(event.type, event.state, historyObj.state);
+        root.innerHTML = window.location.pathname;
+      });
+      (function (historyObj) {
+        let oldPushState = history.pushState;
+        historyObj.pushState = function (state, title, pathname) {
+          let result = oldPushState.apply(history, arguments);
+          updateContent(pathname);
+          return result;
+        };
+      })(historyObj);
+      setTimeout(() => historyObj.pushState({ page: 1 }, "page1", "/page1"), 1000);
+      setTimeout(() => historyObj.pushState({ page: 2 }, "page2", "/page2"), 2000);
+      setTimeout(() => historyObj.pushState({ page: 3 }, "page3", "/page3"), 3000);
+      setTimeout(() => historyObj.back(), 4000);
+      setTimeout(() => historyObj.pushState({ page: 4 }, "page4", "/page4"), 5000);
+      setTimeout(() => historyObj.go(1), 6000);
+    </script>
+  </body>
+</html>
