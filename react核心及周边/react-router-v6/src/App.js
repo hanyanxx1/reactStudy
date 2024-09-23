@@ -1,5 +1,5 @@
 function App() {
-  return <>react route v6</>;
+  return <>App</>;
 }
 
 export default App;
