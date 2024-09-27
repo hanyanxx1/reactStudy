@@ -1,6 +1,6 @@
 import React from "react";
 import { Router } from "../react-router";
-import { createHashHistory, createBrowserHistory } from "history";
+import { createHashHistory, createBrowserHistory } from "../history";
 export * from "../react-router";
 
 export function BrowserRouter({ children }) {
