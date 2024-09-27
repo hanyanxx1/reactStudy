@@ -52,14 +52,26 @@ export function createRoutesFromChildren(children) {
 
 export function Route(props) {}
 function compilePath(path) {
-  let regexpSource = "^" + path;
+  let paramNames = [];
+  let regexpSource =
+    "^" +
+    path.replace(/:(\w+)/g, (_, key) => {
+      paramNames.push(key);
+      return "([^\\/]+)";
+    });
   regexpSource += "$";
   let matcher = new RegExp(regexpSource);
-  return matcher;
+  return [matcher, paramNames];
 }
 export function matchPath(path, pathname) {
-  let matcher = compilePath(path);
+  let [matcher, paramNames] = compilePath(path);
   let match = pathname.match(matcher);
   if (!match) return null;
-  return match;
+  let matchedPathname = match[0];
+  let values = match.slice(1);
+  let params = paramNames.reduce((memo, paramName, index) => {
+    memo[paramName] = values[index];
+    return memo;
+  }, {});
+  return { params, pathname: matchedPathname, path };
 }
