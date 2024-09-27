@@ -75,3 +75,14 @@ export function matchPath(path, pathname) {
   }, {});
   return { params, pathname: matchedPathname, path };
 }
+
+export function useNavigate() {
+  let { navigator } = React.useContext(NavigationContext);
+  let navigate = React.useCallback(
+    (to) => {
+      navigator.push(to);
+    },
+    [navigator]
+  );
+  return navigate;
+}
