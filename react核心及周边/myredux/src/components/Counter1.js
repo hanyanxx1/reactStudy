@@ -20,7 +20,7 @@ export default class Counter extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { number: 0 };
+    this.state = store.getState();
   }
 
   componentDidMount() {
