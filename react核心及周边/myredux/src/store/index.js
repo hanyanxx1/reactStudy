@@ -1,4 +1,9 @@
-import { createStore } from "../redux";
+import { applyMiddleware, createStore } from "../redux";
 import reducer from "./reducers";
-const store = createStore(reducer, { counter1: { number: 0 }, counter2: { number: 0 } });
+import logger from "../redux-logger";
+import thunk from "../redux-thunk";
+import promise from "../redux-promise";
+
+const store = applyMiddleware(promise, thunk, logger)(createStore)(reducer);
+
 export default store;
