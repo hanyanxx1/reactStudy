@@ -1,4 +1,4 @@
-import { HistoryRouter } from "redux-first-history/rr6";
+import { HistoryRouter } from "./redux-first-history/rr6";
 import { Route, Routes, Link } from "react-router-dom";
 import Home from "./components/Home";
 import Counter from "./components/Counter";
