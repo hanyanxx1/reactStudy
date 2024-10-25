@@ -1,4 +1,4 @@
-import { put, take } from "../redux-saga/effects";
+import { put, take, fork } from "../redux-saga/effects";
 import * as types from "./action-types";
 
 function delay(ms) {
@@ -14,7 +14,7 @@ function* workerSaga() {
 
 function* watcherSaga() {
   yield take(types.ASYNC_ADD);
-  yield workerSaga();
+  yield fork(workerSaga);
 }
 
 export default function* rootSaga() {

@@ -19,6 +19,9 @@ export default function runSaga(env, saga) {
             dispatch(effect.action);
             next();
             break;
+          case effectTypes.FORK:
+            runSaga(env, effect.saga);
+            break;
           default:
             break;
         }
