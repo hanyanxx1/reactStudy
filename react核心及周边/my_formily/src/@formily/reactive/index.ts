@@ -17,7 +17,13 @@ const baseHandlers = {
     target[key] = value;
     RawReactionsMap.get(target)
       ?.get(key)
-      ?.forEach((reaction) => reaction());
+      ?.forEach((reaction) => {
+        if (typeof reaction._scheduler === "function") {
+          reaction._scheduler();
+        } else {
+          reaction();
+        }
+      });
     return true;
   },
 };
@@ -48,3 +54,13 @@ export const autorun = (tracker) => {
   }
   reaction();
 };
+
+export class Tracker {
+  constructor(scheduler) {
+    this.track._scheduler = scheduler;
+  }
+  track: any = (tracker) => {
+    currentReaction = this.track;
+    return tracker();
+  };
+}

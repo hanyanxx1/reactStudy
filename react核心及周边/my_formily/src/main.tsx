@@ -1,8 +1,5 @@
-import { observable, autorun } from "./@formily/reactive";
-const obs = observable({ name: "1" });
-const tracker = () => {
-  console.log("tracker", obs.name);
-};
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
 
-autorun(tracker);
-obs.name = "2";
+createRoot(document.getElementById("root")!).render(<App />);
