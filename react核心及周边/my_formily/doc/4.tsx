@@ -1,4 +1,4 @@
-import { createForm, onFormInit, onFormReact } from "@formily/core";
+/* import { createForm, onFormInit, onFormReact } from "@formily/core";
 import React, { useMemo, useState } from "react";
 
 function App() {
@@ -42,3 +42,4 @@ function App() {
 }
 
 export default App;
+ */
