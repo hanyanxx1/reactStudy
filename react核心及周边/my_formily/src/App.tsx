@@ -9,34 +9,29 @@ const SchemaField = createSchemaField({
   components: {
     FormItem,
     Input,
+    NumberPicker,
   },
 });
-
-const schema = {
-  type: "object",
-  properties: {
-    name: {
-      title: "姓名",
-      type: "string",
-      required: true,
-      "x-decorator": "FormItem",
-      "x-component": "Input",
-    },
-    age: {
-      title: "邮箱",
-      type: "string",
-      required: true,
-      "x-validator": "email",
-      "x-decorator": "FormItem", //字段 UI 包装器组件
-      "x-component": "Input", //字段 UI 组件属性
-    },
-  },
-};
 
 function App() {
   return (
     <Form form={form} labelCol={6} wrapperCol={10}>
-      <SchemaField schema={schema} />
+      <SchemaField>
+        <SchemaField.String
+          name="name"
+          title="姓名"
+          required
+          x-component="Input" //字段 UI 组件属性
+          x-decorator="FormItem" //字段 UI 包装器组件
+        />
+        <SchemaField.Number
+          name="age"
+          title="年龄"
+          maximum={120}
+          x-component="NumberPicker" //字段 UI 组件属性
+          x-decorator="FormItem" //字段 UI 包装器组件
+        />
+      </SchemaField>
     </Form>
   );
 }
