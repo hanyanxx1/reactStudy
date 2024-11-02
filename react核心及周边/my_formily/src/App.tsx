@@ -1,43 +1,43 @@
-import { createForm, onFormInit, onFormReact } from "@formily/core";
-import React, { useMemo, useState } from "react";
+import React from "react";
+import { createForm } from "@formily/core";
+import { createSchemaField, Field } from "@formily/react";
+import "@formily/antd/dist/antd.css";
+import { Form, FormItem, Input, NumberPicker } from "@formily/antd";
+
+const form = createForm();
+const SchemaField = createSchemaField({
+  components: {
+    FormItem,
+    Input,
+  },
+});
+
+const schema = {
+  type: "object",
+  properties: {
+    name: {
+      title: "姓名",
+      type: "string",
+      required: true,
+      "x-decorator": "FormItem",
+      "x-component": "Input",
+    },
+    age: {
+      title: "邮箱",
+      type: "string",
+      required: true,
+      "x-validator": "email",
+      "x-decorator": "FormItem", //字段 UI 包装器组件
+      "x-component": "Input", //字段 UI 组件属性
+    },
+  },
+};
 
 function App() {
-  const [state, setState] = useState("init");
-  const form = useMemo(() => {
-    return createForm({
-      effects() {
-        onFormInit(() => {
-          setState("表单已初始化");
-        });
-        onFormReact((form) => {
-          if (form.values.input == "Hello") {
-            setState("响应Hello");
-          } else if (form.values.input == "World") {
-            setState("响应World");
-          }
-        });
-      },
-    });
-  }, []);
-
   return (
-    <div>
-      <p>{state}</p>
-      <button
-        onClick={() => {
-          form.setValuesIn("input", "Hello");
-        }}
-      >
-        Hello
-      </button>
-      <button
-        onClick={() => {
-          form.setValuesIn("input", "World");
-        }}
-      >
-        World
-      </button>
-    </div>
+    <Form form={form} labelCol={6} wrapperCol={10}>
+      <SchemaField schema={schema} />
+    </Form>
   );
 }
 
