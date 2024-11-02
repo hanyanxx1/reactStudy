@@ -1,32 +1,10 @@
-import React from "react";
-import { createForm, onFieldMount, onFieldValueChange } from "@formily/core";
+/* import React from "react";
+import { createForm } from "@formily/core";
 import { createSchemaField } from "@formily/react";
 import "@formily/antd/dist/antd.css";
 import { Form, FormItem, Input } from "@formily/antd";
 
-const form = createForm({
-  effects() {
-    onFieldMount("target", (field: any) => {
-      form.setFieldState(field.query("target"), (targetState) => {
-        if (field.value === "123") {
-          targetState.visible = true;
-        } else {
-          targetState.visible = false;
-        }
-      });
-    });
-    onFieldValueChange("source", (field: any) => {
-      form.setFieldState(field.query("target"), (targetState) => {
-        if (field.value === "123") {
-          targetState.visible = true;
-        } else {
-          targetState.visible = false;
-        }
-      });
-    });
-  },
-});
-
+const form = createForm();
 const SchemaField = createSchemaField({
   components: {
     FormItem,
@@ -46,6 +24,23 @@ const schema = {
       "x-component-props": {
         placeholder: "请输入",
       },
+      "x-reactions": [
+        {
+          target: "target", ///要操作的字段路径，支持FormPathPattern路径语法
+          //代表当前字段实例，可以在普通属性表达式中使用，也能在 x-reactions 中使用
+          when: "{{$self.value == '123'}}",
+          fulfill: {
+            state: {
+              visible: true,
+            },
+          },
+          otherwise: {
+            state: {
+              visible: false,
+            },
+          },
+        },
+      ],
     },
     target: {
       title: "目标",
@@ -69,3 +64,4 @@ function App() {
 }
 
 export default App;
+ */

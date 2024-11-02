@@ -1,32 +1,10 @@
-import React from "react";
-import { createForm, onFieldMount, onFieldValueChange } from "@formily/core";
+/* import React from "react";
+import { createForm } from "@formily/core";
 import { createSchemaField } from "@formily/react";
 import "@formily/antd/dist/antd.css";
 import { Form, FormItem, Input } from "@formily/antd";
 
-const form = createForm({
-  effects() {
-    onFieldMount("target", (field: any) => {
-      form.setFieldState(field.query("target"), (targetState) => {
-        if (field.value === "123") {
-          targetState.visible = true;
-        } else {
-          targetState.visible = false;
-        }
-      });
-    });
-    onFieldValueChange("source", (field: any) => {
-      form.setFieldState(field.query("target"), (targetState) => {
-        if (field.value === "123") {
-          targetState.visible = true;
-        } else {
-          targetState.visible = false;
-        }
-      });
-    });
-  },
-});
-
+const form = createForm();
 const SchemaField = createSchemaField({
   components: {
     FormItem,
@@ -56,6 +34,22 @@ const schema = {
         placeholder: "请输入",
       },
       "x-decorator": "FormItem", //字段 UI 包装器组件
+      "x-reactions": [
+        {
+          dependencies: ["source"],
+          when: '{{$deps[0] == "123"}}',
+          fulfill: {
+            state: {
+              visible: true,
+            },
+          },
+          otherwise: {
+            state: {
+              visible: false,
+            },
+          },
+        },
+      ],
     },
   },
 };
@@ -69,3 +63,4 @@ function App() {
 }
 
 export default App;
+ */
