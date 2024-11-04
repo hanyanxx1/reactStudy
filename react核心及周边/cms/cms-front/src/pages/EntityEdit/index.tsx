@@ -1,18 +1,47 @@
-import { PageContainer } from "@ant-design/pro-components";
+import { PageContainer } from '@ant-design/pro-components';
 import { FormProvider, createSchemaField } from '@formily/react';
 import { createForm, onFieldValueChange, FormPath } from '@formily/core';
 import { Card, InputNumber } from 'antd';
-import { FormItem, Editable, Input, ArrayTable, Select, Checkbox, Switch, FormLayout, FormGrid, FormButtonGroup, Submit } from '@formily/antd'
+import {
+  FormItem,
+  Editable,
+  Input,
+  ArrayTable,
+  Select,
+  Checkbox,
+  Switch,
+  FormLayout,
+  FormGrid,
+  FormButtonGroup,
+  Submit,
+} from '@formily/antd';
 import { useRequest, request, useLocation } from 'umi';
-import { FIELD, BUTTON, BUTTON_ACTION, BUTTON_ACTION_TYPES, METHOD } from '@/constants/enums';
+import {
+  FIELD,
+  BUTTON,
+  BUTTON_ACTION,
+  BUTTON_ACTION_TYPES,
+  METHOD,
+} from '@/constants/enums';
 import { initialEntityValues } from './initValue';
-import { useMount } from "ahooks";
+import { useMount } from 'ahooks';
 import Qs from 'query-string';
+import { fromFieldValues } from '@/utils/fieldValues';
 const { parse } = FormPath;
 const SchemaField = createSchemaField({
   components: {
-    FormItem, Editable, Input, ArrayTable, Select, Checkbox, Switch, FormLayout, Card, FormGrid, InputNumber
-  }
+    FormItem,
+    Editable,
+    Input,
+    ArrayTable,
+    Select,
+    Checkbox,
+    Switch,
+    FormLayout,
+    Card,
+    FormGrid,
+    InputNumber,
+  },
 });
 const form = createForm({
   effects(form) {
@@ -21,7 +50,9 @@ const form = createForm({
         let dataValue = form.getValuesIn(state.address.entire);
         for (let item of dataValue) {
           if (item.name === 'url') {
-            let action = form.getValuesIn(parse('.action', state.address.entire).entire);
+            let action = form.getValuesIn(
+              parse('.action', state.address.entire).entire,
+            );
             item.value = getUrl(action, value);
           }
         }
@@ -38,85 +69,151 @@ const form = createForm({
       }
     }
   },
-  initialValues: initialEntityValues
+  initialValues: initialEntityValues,
 });
 export default function () {
   const location = useLocation();
   const query = Qs.parse(location.search);
-  const loadQuery = useRequest((id) => request(`/api/entity/${id}`, {
-    method: 'GET'
-  }), {
-    manual: true,
-    onSuccess(data) {
-      form.setValues(data);
-    }
-  });
-  const updateQuery = useRequest((id, values) => request(`/api/entity/${id}`, {
-    method: 'PUT',
-    data: values
-  }), {
-    manual: true, onSuccess() {
-      history.back();
-    }
-  });
-  const addQuery = useRequest((values) => request(`/api/entity`, {
-    method: 'POST',
-    data: values
-  }), {
-    manual: true, onSuccess() {
-      history.back();
-    }
-  });
+  const loadQuery = useRequest(
+    (id) =>
+      request(`/api/entity/${id}`, {
+        method: 'GET',
+      }),
+    {
+      manual: true,
+      onSuccess(data) {
+        form.setValues(data);
+      },
+    },
+  );
+  const updateQuery = useRequest(
+    (id, values) =>
+      request(`/api/entity/${id}`, {
+        method: 'PUT',
+        data: values,
+      }),
+    {
+      manual: true,
+      onSuccess() {
+        history.back();
+      },
+    },
+  );
+  const addQuery = useRequest(
+    (values) =>
+      request(`/api/entity`, {
+        method: 'POST',
+        data: values,
+      }),
+    {
+      manual: true,
+      onSuccess() {
+        history.back();
+      },
+    },
+  );
   useMount(() => {
     if (query.id) {
       loadQuery.run(query.id);
     } else {
-      form.setValues(initialEntityValues)
+      form.setValues(initialEntityValues);
     }
   });
   const handleSubmit = (values) => {
     if (query.id) {
-      updateQuery.run(query.id, values);
+      const newValues = fromFieldValues(values);
+      updateQuery.run(query.id, newValues);
     } else {
       addQuery.run(values);
     }
-  }
+  };
   return (
     <PageContainer>
       <FormProvider form={form}>
         <SchemaField>
-          <SchemaField.Void x-component="FormGrid" x-component-props={{ maxColumns: 4, minColumns: 2 }} >
-            <SchemaField.String name="name" title="名称" x-decorator="FormItem" required x-component="Input" />
-            <SchemaField.String name="title" title="标题" x-decorator="FormItem" required x-component="Input" />
+          <SchemaField.Void
+            x-component="FormGrid"
+            x-component-props={{ maxColumns: 4, minColumns: 2 }}
+          >
+            <SchemaField.String
+              name="name"
+              title="名称"
+              x-decorator="FormItem"
+              required
+              x-component="Input"
+            />
+            <SchemaField.String
+              name="title"
+              title="标题"
+              x-decorator="FormItem"
+              required
+              x-component="Input"
+            />
           </SchemaField.Void>
-          <SchemaField.Array name="fields" x-decorator="FormItem" x-component="ArrayTable">
+          <SchemaField.Array
+            name="fields"
+            x-decorator="FormItem"
+            x-component="ArrayTable"
+          >
             <SchemaField.Object>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '排序', align: 'center' }}>
+                x-component-props={{ title: '排序', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.SortHandle" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '索引', align: 'center' }}>
+                x-component-props={{ title: '索引', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.Index" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '名称', align: 'center', width: 80 }}>
-                <SchemaField.String x-component="Input" required x-decorator="FormItem" name="name" />
+                x-component-props={{
+                  title: '名称',
+                  align: 'center',
+                  width: 80,
+                }}
+              >
+                <SchemaField.String
+                  x-component="Input"
+                  required
+                  x-decorator="FormItem"
+                  name="name"
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '标题', align: 'center', width: 80 }}>
-                <SchemaField.String x-component="Input" required x-decorator="FormItem" name="title" />
+                x-component-props={{
+                  title: '标题',
+                  align: 'center',
+                  width: 80,
+                }}
+              >
+                <SchemaField.String
+                  x-component="Input"
+                  required
+                  x-decorator="FormItem"
+                  name="title"
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '类型', align: 'center' }}>
-                <SchemaField.String x-component="Select" required x-decorator="FormItem" name="type" enum={FIELD} />
+                x-component-props={{ title: '类型', align: 'center' }}
+              >
+                <SchemaField.String
+                  x-component="Select"
+                  required
+                  x-decorator="FormItem"
+                  name="type"
+                  enum={FIELD}
+                />
               </SchemaField.Void>
-              <SchemaField.Void x-component="ArrayTable.Column" x-component-props={{ title: '配置字段数据', align: 'center' }}>
+              <SchemaField.Void
+                x-component="ArrayTable.Column"
+                x-component-props={{ title: '配置字段数据', align: 'center' }}
+              >
                 <SchemaField.Array
                   name="data"
                   x-decorator="Editable.Popover"
@@ -125,14 +222,12 @@ export default function () {
                     pagination: { pageSize: 10 },
                     scroll: { x: '100%' },
                   }}
-                  x-reactions={
-                    (field: any) => {
-                      let value = field.getState().value;
-                      if (value.length > 0) {
-                        field.title = value.map(item => item.title).join(',');
-                      }
+                  x-reactions={(field: any) => {
+                    let value = field.getState().value || [];
+                    if (value.length > 0) {
+                      field.title = value.map((item) => item.title).join(',');
                     }
-                  }
+                  }}
                 >
                   <SchemaField.Object>
                     <SchemaField.Void
@@ -199,18 +294,18 @@ export default function () {
                   required
                   x-component="Switch"
                   x-reactions={{
-                    "dependencies": [".type"],
-                    "when": "{{$deps[0] === 'number'}}",
+                    dependencies: ['.type'],
+                    when: "{{$deps[0] === 'number'}}",
                     fulfill: {
                       state: {
-                        value: true
-                      }
+                        value: true,
+                      },
                     },
                     otherwise: {
                       state: {
-                        value: false
-                      }
-                    }
+                        value: false,
+                      },
+                    },
                   }}
                 />
               </SchemaField.Void>
@@ -245,34 +340,67 @@ export default function () {
             />
           </SchemaField.Array>
 
-          <SchemaField.Array name="page" x-decorator="FormItem" x-component="ArrayTable">
+          <SchemaField.Array
+            name="page"
+            x-decorator="FormItem"
+            x-component="ArrayTable"
+          >
             <SchemaField.Object>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '排序', align: 'center' }}>
+                x-component-props={{ title: '排序', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.SortHandle" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '索引', align: 'center' }}>
+                x-component-props={{ title: '索引', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.Index" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '标题', align: 'center', width: 100 }}>
-                <SchemaField.String x-component="Input" required x-decorator="FormItem" name="title" />
+                x-component-props={{
+                  title: '标题',
+                  align: 'center',
+                  width: 100,
+                }}
+              >
+                <SchemaField.String
+                  x-component="Input"
+                  required
+                  x-decorator="FormItem"
+                  name="title"
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '类型', align: 'center' }}>
-                <SchemaField.String x-component="Select" required x-decorator="FormItem" name="type" enum={BUTTON} />
+                x-component-props={{ title: '类型', align: 'center' }}
+              >
+                <SchemaField.String
+                  x-component="Select"
+                  required
+                  x-decorator="FormItem"
+                  name="type"
+                  enum={BUTTON}
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '操作', align: 'center' }}>
-                <SchemaField.String x-component="Select" required x-decorator="FormItem" name="action" enum={BUTTON_ACTION} />
+                x-component-props={{ title: '操作', align: 'center' }}
+              >
+                <SchemaField.String
+                  x-component="Select"
+                  required
+                  x-decorator="FormItem"
+                  name="action"
+                  enum={BUTTON_ACTION}
+                />
               </SchemaField.Void>
-              <SchemaField.Void x-component="ArrayTable.Column" x-component-props={{ title: '配置页面数据', align: 'center' }}>
+              <SchemaField.Void
+                x-component="ArrayTable.Column"
+                x-component-props={{ title: '配置页面数据', align: 'center' }}
+              >
                 <SchemaField.Array
                   name="data"
                   x-decorator="Editable.Popover"
@@ -281,14 +409,12 @@ export default function () {
                     pagination: { pageSize: 10 },
                     scroll: { x: '100%' },
                   }}
-                  x-reactions={
-                    (field: any) => {
-                      let value = field.getState().value;
-                      if (value.length > 0) {
-                        field.title = value.map(item => item.name).join(',');
-                      }
+                  x-reactions={(field: any) => {
+                    let value = field.getState().value;
+                    if (value.length > 0) {
+                      field.title = value.map((item) => item.name).join(',');
                     }
-                  }
+                  }}
                 >
                   <SchemaField.Object>
                     <SchemaField.Void
@@ -322,19 +448,19 @@ export default function () {
                         required
                         x-component="Input"
                         x-reactions={{
-                          dependencies: [".name"],
+                          dependencies: ['.name'],
                           when: "{{$deps[0] === 'method'}}",
                           fulfill: {
                             schema: {
-                              'x-component': "Select",
-                              enum: METHOD
-                            }
+                              'x-component': 'Select',
+                              enum: METHOD,
+                            },
                           },
                           otherwise: {
                             schema: {
-                              'x-component': "Input"
-                            }
-                          }
+                              'x-component': 'Input',
+                            },
+                          },
                         }}
                       />
                     </SchemaField.Void>
@@ -381,34 +507,67 @@ export default function () {
             />
           </SchemaField.Array>
 
-          <SchemaField.Array name="record" x-decorator="FormItem" x-component="ArrayTable">
+          <SchemaField.Array
+            name="record"
+            x-decorator="FormItem"
+            x-component="ArrayTable"
+          >
             <SchemaField.Object>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '排序', align: 'center' }}>
+                x-component-props={{ title: '排序', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.SortHandle" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '索引', align: 'center' }}>
+                x-component-props={{ title: '索引', align: 'center' }}
+              >
                 <SchemaField.Void x-component="ArrayTable.Index" />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '标题', align: 'center', width: 100 }}>
-                <SchemaField.String x-component="Input" required x-decorator="FormItem" name="title" />
+                x-component-props={{
+                  title: '标题',
+                  align: 'center',
+                  width: 100,
+                }}
+              >
+                <SchemaField.String
+                  x-component="Input"
+                  required
+                  x-decorator="FormItem"
+                  name="title"
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '类型', align: 'center' }}>
-                <SchemaField.String x-component="Select" required x-decorator="FormItem" name="type" enum={BUTTON} />
+                x-component-props={{ title: '类型', align: 'center' }}
+              >
+                <SchemaField.String
+                  x-component="Select"
+                  required
+                  x-decorator="FormItem"
+                  name="type"
+                  enum={BUTTON}
+                />
               </SchemaField.Void>
               <SchemaField.Void
                 x-component="ArrayTable.Column"
-                x-component-props={{ title: '操作', align: 'center' }}>
-                <SchemaField.String x-component="Select" required x-decorator="FormItem" name="action" enum={BUTTON_ACTION} />
+                x-component-props={{ title: '操作', align: 'center' }}
+              >
+                <SchemaField.String
+                  x-component="Select"
+                  required
+                  x-decorator="FormItem"
+                  name="action"
+                  enum={BUTTON_ACTION}
+                />
               </SchemaField.Void>
-              <SchemaField.Void x-component="ArrayTable.Column" x-component-props={{ title: '配置记录数据', align: 'center' }}>
+              <SchemaField.Void
+                x-component="ArrayTable.Column"
+                x-component-props={{ title: '配置记录数据', align: 'center' }}
+              >
                 <SchemaField.Array
                   name="data"
                   x-decorator="Editable.Popover"
@@ -417,14 +576,12 @@ export default function () {
                     pagination: { pageSize: 10 },
                     scroll: { x: '100%' },
                   }}
-                  x-reactions={
-                    (field: any) => {
-                      let value = field.getState().value;
-                      if (value.length > 0) {
-                        field.title = value.map(item => item.name).join(',');
-                      }
+                  x-reactions={(field: any) => {
+                    let value = field.getState().value;
+                    if (value.length > 0) {
+                      field.title = value.map((item) => item.name).join(',');
                     }
-                  }
+                  }}
                 >
                   <SchemaField.Object>
                     <SchemaField.Void
@@ -458,19 +615,19 @@ export default function () {
                         required
                         x-component="Input"
                         x-reactions={{
-                          dependencies: [".name"],
+                          dependencies: ['.name'],
                           when: "{{$deps[0] === 'method'}}",
                           fulfill: {
                             schema: {
-                              'x-component': "Select",
-                              enum: METHOD
-                            }
+                              'x-component': 'Select',
+                              enum: METHOD,
+                            },
                           },
                           otherwise: {
                             schema: {
-                              'x-component': "Input"
-                            }
-                          }
+                              'x-component': 'Input',
+                            },
+                          },
                         }}
                       />
                     </SchemaField.Void>
@@ -522,7 +679,7 @@ export default function () {
         </FormButtonGroup>
       </FormProvider>
     </PageContainer>
-  )
+  );
 }
 //实体设计
 //实体的名称 标题 book  书籍

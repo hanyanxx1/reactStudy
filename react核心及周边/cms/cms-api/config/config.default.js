@@ -1,41 +1,41 @@
 /* eslint valid-jsdoc: "off" */
 
-'use strict';
+"use strict";
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
  */
-module.exports = appInfo => {
+module.exports = (appInfo) => {
   /**
    * built-in config
    * @type {Egg.EggAppConfig}
    **/
-  const config = exports = {};
+  const config = (exports = {});
 
   // use for cookie sign key, should change to your own and keep security
-  config.keys = appInfo.name + '_1656223489640_3391';
+  config.keys = appInfo.name + "_1656223489640_3391";
 
   // add your middleware config here
   config.middleware = [];
   config.security = {
-    csrf: false
-  }
+    csrf: false,
+  };
   config.mysql = {
     client: {
-      host: 'localhost',
+      host: "localhost",
       port: 3306,
-      user: 'root',
-      password: 'root',
-      database: 'cms'
-    }
-  }
+      user: "root",
+      password: "!@#hy1990424",
+      database: "cms",
+    },
+  };
   config.view = {
-    defaultExtension: '.js',
-    defaultViewEngine: 'nunjucks',
+    defaultExtension: ".js",
+    defaultViewEngine: "nunjucks",
     mapping: {
-      '.js': 'nunjucks'
-    }
-  }
+      ".js": "nunjucks",
+    },
+  };
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
