@@ -24,6 +24,16 @@ export default defineConfig({
       path: '/entity',
       component: './Entity',
     },
+    {
+      name: '实体编辑',
+      path: '/entity/edit',
+      component: './EntityEdit',
+    },
+    {
+      name: '实体数据管理',
+      path: '/entity/view',
+      component: './EntityView',
+    }
   ],
   npmClient: 'pnpm',
   proxy: {
